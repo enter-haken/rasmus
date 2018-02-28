@@ -1,0 +1,3 @@
+%% encoding: UTF-8
+{application,db}.
+{modules,[db_app,db_sup]}.
