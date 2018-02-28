@@ -30,4 +30,4 @@ Currently only 'play data' is inserted.
 
     $ make clean
 
-will drop the schema `core' and `cms`.
+will drop the schema `core` and `cms`.
