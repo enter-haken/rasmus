@@ -16,3 +16,9 @@ BEGIN
    RETURN '{ "is_dirty": false }'::JSONB;
 END
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION send_message(schema TEXT, entity TEXT, action TEXT, message TEXT) RETURNS VOID AS $$
+BEGIN
+    PERFORM pg_notify(schema, format('{"schema":"%s","entity":"%s","action":"%s" "message":"%s"}', schema, entity, action, message));
+END
+$$ LANGUAGE plpgsql;

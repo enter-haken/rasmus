@@ -50,6 +50,7 @@ BEGIN
         BEGIN
             UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
                 WHERE id = %1$s_id;
+            PERFORM send_message(''core'',''%1$s'',''dirty'',%1$s_id::TEXT);
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
         
