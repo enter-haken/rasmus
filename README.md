@@ -32,7 +32,7 @@ A simple
     $ make
 
 will create the schema `core` and `cms` for `rasmus`.
-It will also compile the `erlang` backend.
+It will also compile the `elixir` backend.
 At the moment, the database will be reseted on every `make` call.
 
 ## run
