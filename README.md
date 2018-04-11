@@ -12,13 +12,13 @@ More progress on this work will be published on [enter-haken](http://enter-haken
 ## stack
 
 * `rasmus` uses `PostgreSQL` as a database backend.
-* `erlang` and `rebar3` is used for the application backend.
+* `elixir` is used for the application backend.
 
 ## build
 
 ### requirements
 
-* erlang >= 20
+* elixir 1.5.2 with erlang >= 20
 * PostgreSQL >= 9.0
 
 ### compile
@@ -39,7 +39,7 @@ At the moment, the database will be reseted on every `make` call.
 
     $ make run
 
-will start the `erlang` backend, and starts the `erl` shell.
+Currently, the elixir shell is started with `--no-halt` and listen to database messages.
 
 # contact
 
