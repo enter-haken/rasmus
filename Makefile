@@ -1,14 +1,14 @@
 .PHONY: all clean first_time
 all:
 	make -C ./scripts all
-	make -C ./db
+	make -C ./backend
 clean:
 	make -C ./scripts clean
-	make -C ./db clean
+	make -C ./backend clean
 
 # on first time use, the rasmus db must be created
 first_time:
-	make -C ./db createdb
+	make -C ./scripts/core createdb
 
 run:
-	make -C ./db run
+	make -C ./backend run

@@ -9,6 +9,7 @@ BEGIN
     END IF;
 
     NEW.updated_at := now();
+
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;

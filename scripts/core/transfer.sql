@@ -1,6 +1,6 @@
 SET search_path TO core,public;
 
-CREATE TYPE transfer_status as ENUM (
+CREATE TYPE transfer_state as ENUM (
     'pending',
     'processing',
     'succeeded',
@@ -16,29 +16,86 @@ CREATE TYPE transfer_status as ENUM (
 
 CREATE TABLE transfer(
 	id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    status transfer_status NOT NULL DEFAULT 'pending',
+    state transfer_state NOT NULL DEFAULT 'pending',
     request JSONB NOT NULL,
     result JSONB
 );
 
--- todo: more generic
-CREATE FUNCTION transfer_trigger() RETURNS TRIGGER AS $$
+CREATE FUNCTION send_receipt() RETURNS TRIGGER AS $$
 BEGIN 
-    PERFORM pg_notify(NEW.request->>'schema', NEW.id::text); 
-    
-    --RAISE NOTICE NEW.request->>'schema';
-    
-    --CASE NEW.request->>'schema'
-    --    WHEN 'core' THEN
-    --        SELECT core.manager(NEW.id, NEW.request) INTO NEW.response;
-    --    WHEN 'cms' THEN
-    --       SELECT cms.manager(NEW.id, NEW.request) INTO NEW.response;
-    --    ELSE
-    --        RAISE EXCEPTION 'not a valid schema'
-    --END CASE;
+    --todo: make some base validation on the request object
+    -- eg. valid schema / entity / action
+    -- payload not null
+    -- ...
+
+    -- each schema has it's own listener channel
+    PERFORM pg_notify(NEW.request->>'schema', NEW.id::text);
+    -- actions could be launched here, but the trigger should return quickly
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER transfer_before_trigger BEFORE INSERT ON transfer
-    FOR EACH ROW EXECUTE PROCEDURE transfer_trigger();
+-- usually inserts are requests from the web backend
+CREATE TRIGGER send_receipt_trigger BEFORE INSERT ON transfer
+    FOR EACH ROW EXECUTE PROCEDURE send_receipt();
+
+
+--CREATE FUNCTION process_receipt(transfer_id UUID) RETURNS VOID AS $$
+--
+--$$ LANGUAGE plpgsql;
+
+
+
+
+
+
+-- update transfer states
+CREATE FUNCTION set_state(transfer_id UUID, new_state transfer_state) RETURNS VOID AS $$
+BEGIN
+    UPDATE transfer set state = new_state WHERE id = transfer_id;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION set_pending(transfer_id UUID) RETURNS VOID AS $$
+BEGIN
+    PERFORM set_state(transfer_id, 'pending');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION set_processing(transfer_id UUID) RETURNS VOID AS $$
+BEGIN
+    PERFORM set_state(transfer_id, 'processing'); 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION set_succeeded(transfer_id UUID) RETURNS VOID AS $$
+BEGIN
+    PERFORM set_state(transfer_id, 'succeeded'); 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION set_succeded_with_warning(transfer_id UUID) RETURNS VOID AS $$
+BEGIN
+    PERFORM set_state(transfer_id, 'succeeded_with_warning'); 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION set_error(transfer_id UUID) RETURNS VOID AS $$
+BEGIN
+    PERFORM set_state(transfer_id, 'error'); 
+END
+$$ LANGUAGE plpgsql;
+
+
+-- after processing is finishesd handle notifications
+-- based on the state
+-- a worker function must not send notifications to the backend
+CREATE FUNCTION finished() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.state = 'succeeded';
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER finished_trigger AFTER UPDATE ON transfer
+    FOR EACH ROW EXECUTE PROCEDURE finished();

@@ -1,38 +1,50 @@
 SET search_path TO core,public;
 
-INSERT INTO privilege (name, description) VALUES ('dashboaord', 'show dashboard');
+INSERT INTO transfer (request) VALUES ('{"schema":"core", "entity":"privilege", "payload": {"name":"dasboard", "description": "show dashboard", "role_level":"guest"}}'::JSONB),
+    ('{"schema":"core", "entity":"privilege", "payload": {"name":"news", "description": "show news feed", "role_level":"guest"}}'::JSONB),
+    ('{"schema":"core", "entity":"role", "payload": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
+    ('{"schema":"core", "entity":"role", "payload": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
+    ('{"schema":"core", "entity":"role", "payload": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
+    ('{"schema":"core", "entity":"user_account", "payload" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
 
-INSERT INTO role (name, description) VALUES 
-    ('admin', 'the admin can do everything within the instance'),
-    ('user', 'this is the standard user role'),
-    ('guest', 'this role is used, when a user is not logged in');
+INSERT INTO privilege (name, description, minimum_read_role_level) VALUES ('dashboard', 'manage system dashboard', 'default');
+INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),
+    ('role_management', 'work with systemwide role management'),
+    ('privilege_management', 'work with systemwide privilege management');
 
-INSERT INTO user_account (first_name, last_name, email_address, login) VALUES
-    ('Jan Frederik', 'Hake', 'jan_hake@gmx.de', 'jan_hake'),
-    ('Jemand', 'Anders', 'jemand@anders.de', 'jemand_anders');
+INSERT INTO role (name, description, role_level) VALUES 
+    ('admin', 'the admin can do everything within the instance','admin');
 
--- todo: find a more generic way to insert n-m relations
+-- add all privileges to admin role with read and write permissions
 DO $$
-DECLARE 
-    id_jan UUID;
-    id_jemand UUID;
-    id_admin UUID;
-    id_user UUID;
-BEGIN    
-    SELECT id INTO id_jan FROM user_account WHERE first_name = 'Jan Frederik'; 
-    SELECT id INTO id_admin FROM role WHERE name = 'admin';
-    
-    INSERT INTO user_in_role (id_user_account, id_role) VALUES
-        (id_jan, id_admin);
+DECLARE
+    admin_role_id UUID;
+    admin_user_id UUID;
+    priv record;
+BEGIN
+    SELECT id from role INTO admin_role_id;
+    FOR priv in SELECT id FROM privilege
+    LOOP
+        INSERT INTO role_privilege(id_role,id_privilege, can_write) VALUES
+            (admin_role_id, priv.id, true);
+    END LOOP;
 
-    SELECT id INTO id_jemand FROM user_account WHERE first_name = 'Jemand'; 
-    SELECT id INTO id_user FROM role WHERE name = 'user';
-    
-    INSERT INTO user_in_role (id_user_account, id_role) VALUES
-        (id_jemand, id_user);
+    --PERFORM get_role_view(admin_role_id);
 
-    INSERT INTO transfer (request) VALUES 
-    ('{ "schema": "core"}'::JSONB);
+    --todo: this should be done during installation
+    --todo: workflow: insert into transfer with email address
+    --todo: workflow: add admin role to newly created admin user
+    --todo: workflow: send email with password to new site admin
+    INSERT INTO user_account (login,email_address) VALUES
+        ('admin','admin@admin.com') RETURNING id into admin_user_id;
+
+    INSERT INTO user_in_role (id_user_account, id_role) VALUES
+        (admin_user_id, admin_role_id);
+
+    PERFORM get_user_view(admin_user_id);
+
+    DELETE from privilege where name = 'dashboard';
 
 END
 $$ LANGUAGE plpgsql
+
