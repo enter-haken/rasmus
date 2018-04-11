@@ -1,5 +1,7 @@
 SET search_path TO core,public;
 
+CREATE TYPE role_level AS ENUM ('admin','user','default');
+
 --todo: seed admin account? during install?
 --json view -> user + roles + privileges
 CREATE TABLE user_account(
@@ -10,10 +12,10 @@ CREATE TABLE user_account(
     password VARCHAR(254), --> todo: not null -> generate and send mail with credentials
     login VARCHAR(254) UNIQUE NOT NULL,
     signature VARCHAR(254),
+    maximum_role_level role_level NOT NULL DEFAULT 'default',
     json_view JSONB
 );
 
-CREATE TYPE role_level AS ENUM ('admin','user','default');
 
 -- todo: who can add/update/delete a role
 -- todo: seed base roles: admin, readonly

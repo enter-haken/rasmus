@@ -35,8 +35,8 @@ BEGIN
     --todo: workflow: insert into transfer with email address
     --todo: workflow: add admin role to newly created admin user
     --todo: workflow: send email with password to new site admin
-    INSERT INTO user_account (login,email_address) VALUES
-        ('admin','admin@admin.com') RETURNING id into admin_user_id;
+    INSERT INTO user_account (login,email_address, maximum_role_level) VALUES
+        ('admin','admin@admin.com', 'admin') RETURNING id into admin_user_id;
 
     INSERT INTO user_in_role (id_user_account, id_role) VALUES
         (admin_user_id, admin_role_id);
