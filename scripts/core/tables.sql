@@ -156,7 +156,7 @@ BEGIN
 
     role_raw := role_raw
         || jsonb_build_object('privileges', role_privileges)
-        || get_json_template();
+        || get_entity('role');
 
     UPDATE role set json_view = role_raw WHERE id = role_id;
     RAISE NOTICE 'update json_view for role %', role_id;
@@ -197,7 +197,7 @@ BEGIN
     --todo: generic update dirty jsonviews
     user_raw := user_raw
         || jsonb_build_object('roles', user_roles)
-        || get_json_template();
+        || get_entity('user_account');
     
     UPDATE user_account SET json_view = user_raw WHERE id = user_id;
     RAISE NOTICE 'the json_view for user_account % has been updated', user_id;

@@ -11,9 +11,9 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- when postgres is compiled with python support
 -- CREATE OR REPLACE LANGUAGE plpython3u;
 
-CREATE FUNCTION get_json_template() RETURNS JSONB AS $$
+CREATE FUNCTION get_entity(entity TEXT) RETURNS JSONB AS $$
 BEGIN
-   RETURN '{ "is_dirty": false }'::JSONB;
+    RETURN format('{ "entity": "%s", "is_dirty": false}', entity)::JSONB;
 END
 $$ LANGUAGE plpgsql;
 

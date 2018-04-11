@@ -13,9 +13,18 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION send_message_on_set_dirty_trigger() RETURNS TRIGGER AS $$
+BEGIN
+    IF (NEW.json_view->>'is_dirty')::BOOLEAN THEN
+        PERFORM send_message('core', NEW.json_view->>'entity','dirty', NEW.id::TEXT);
+    END IF;
+    RAISE NOTICE '% updated', NEW.json_view->>'entity';
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
 -- add created_at and updated_at columns to every table
 -- and add update trigger to every table
-
 DO $$
 DECLARE
     row record;
@@ -50,7 +59,6 @@ BEGIN
         BEGIN
             UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
                 WHERE id = %1$s_id;
-            PERFORM send_message(''core'',''%1$s'',''dirty'',%1$s_id::TEXT);
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
         
@@ -60,6 +68,9 @@ BEGIN
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
+        
+        EXECUTE 'CREATE TRIGGER ' || current_table || '_send_message_on_set_dirty_trigger AFTER UPDATE ON ' || current_table ||
+            ' FOR EACH ROW EXECUTE PROCEDURE send_message_on_set_dirty_trigger();';
 
     END LOOP;
 END
