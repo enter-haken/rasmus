@@ -6,18 +6,22 @@ The core schema provide information about
 * the roles
 * and the privileges
 
-of rasmus.
+of `rasmus`.
 
 all these entities can be defined as you like.
 
 # role levels
 
-To prevent making normal users to admin, or giving normal users privileges, only admins should have, there are system wide `role_levels`.
-They can be attached to `roles` and to `privileges`.
+You can assign role levels to users, privileges and role.
+
+Examples:
+
+* When you have a privilege with the `admin role level`, you can assign this privilege only to a role with the same level.
+* You can't assign a user with a `user role level` to a role with an `admin role level`.
 
 ## default 
 
-The `guest` role level is the lowest one. 
+The `default` role level is the lowest one. 
 
 ## user
 
@@ -37,12 +41,13 @@ When a new `user_account` is created, the `maximum_role_level` decides, which `r
 
 Privileges can be used inside of `rasmus` applications.
 A privilege can be connected with a `role`.
-You can only connect a `privilege' with a `role` with at least the same `role_level`.
+You can only connect a `privilege` with a `role` with at least the same `role_level`.
 Every `privilege` have a `minimum_read_role_level` and a `minimum_write_role_level`.
 
 ## role
 
-A `role` can hold multiple `privileges`
+A `role` can hold multiple `privileges`.
+You can define read and write permissions for every privilege of a role.
 
 # post DDL scripts
 
