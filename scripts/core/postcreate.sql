@@ -41,7 +41,7 @@ BEGIN
         EXECUTE 'ALTER TABLE ' || row.tablename ||
             ' ADD COLUMN deleted boolean NOT NULL DEFAULT false';
 
-        EXECUTE 'CREATE TRIGGER ' || row.tablename || '_trigger BEFORE UPDATE ON ' || row.tablename ||
+        EXECUTE 'CREATE TRIGGER ' || row.tablename || '_metadata_trigger BEFORE UPDATE ON ' || row.tablename ||
             ' FOR EACH ROW EXECUTE PROCEDURE metadata_trigger();';
     END LOOP;
 END

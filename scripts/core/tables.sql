@@ -76,7 +76,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION privilege_has_changed() RETURNS TRIGGER AS $$
+CREATE FUNCTION privilege_has_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
     PERFORM set_roles_dirty_for_privilege_change(NEW.id);
     RAISE NOTICE 'privilege % has changed', NEW.id;
@@ -85,7 +85,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION privilege_has_been_deleted() RETURNS TRIGGER AS $$
+CREATE FUNCTION privilege_has_been_deleted_trigger() RETURNS TRIGGER AS $$
 BEGIN
     PERFORM set_roles_dirty_for_privilege_change(OLD.id);
     RAISE NOTICE 'privilege % has been deleted', OLD.id;
@@ -96,12 +96,12 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER privilege_update_trigger BEFORE UPDATE ON privilege
-    FOR EACH ROW EXECUTE PROCEDURE privilege_has_changed();
+    FOR EACH ROW EXECUTE PROCEDURE privilege_has_changed_trigger();
 
 CREATE TRIGGER privilege_delete_trigger BEFORE DELETE ON privilege
-    FOR EACH ROW EXECUTE PROCEDURE privilege_has_been_deleted();
+    FOR EACH ROW EXECUTE PROCEDURE privilege_has_been_deleted_trigger();
 
-CREATE FUNCTION role_changed() RETURNS TRIGGER AS $$
+CREATE FUNCTION role_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
     PERFORM set_user_account_dirty_for_role_change(NEW.id);
     
@@ -118,17 +118,27 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER role_update_trigger BEFORE UPDATE ON role
-    FOR EACH ROW EXECUTE PROCEDURE role_changed();
+    FOR EACH ROW EXECUTE PROCEDURE role_changed_trigger();
 
 CREATE TRIGGER role_delete_trigger AFTER DELETE ON role
-    FOR EACH ROW EXECUTE PROCEDURE role_changed();
+    FOR EACH ROW EXECUTE PROCEDURE role_changed_trigger();
 
--- When inserting a new role, there are no asociated privileges
--- there are no users associated with this new role
--- -> no need for a trigger
----CREATE TRIGGER role_insert_trigger AFTER INSERT ON role
---    FOR EACH ROW EXECUTE PROCEDURE role_changed();
+CREATE FUNCTION user_account_changed() RETURNS TRIGGER AS $$
+BEGIN
+    -- todo: generic check for other entity values changes
+    IF OLD.json_view IS NULL OR NEW.json_view <> OLD.json_view THEN
+        RAISE NOTICE 'Only the json_view for role % has changed. The role it self does not change.', NEW.id;
+        RETURN NEW;
+    END IF;
 
+    NEW.json_view = jsonb_set(NEW.json_view, '{is_dirty}', 'true');
+    RETURN NEW;
+
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_account_changed_trigger BEFORE UPDATE ON user_account
+    FOR EACH ROW EXECUTE PROCEDURE user_account_changed();
 
 CREATE FUNCTION get_role_view(role_id UUID) RETURNS JSONB AS $$
 DECLARE
