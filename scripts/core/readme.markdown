@@ -10,18 +10,38 @@ of `rasmus`.
 
 all these entities can be defined as you like.
 
+# main tables
+
+## user\_account
+
+The `user_account` holds information about a `rasmus user`.
+You have to provide at least a `login` and an `email_address`.
+
+## privilege
+
+Privileges can be used inside of `rasmus` applications.
+You have to give a privilege a unique `name`.
+A privilege can be assigned to a `role`.
+
+## role
+
+A `role` can hold multiple `privileges`.
+You can define read and write permissions for every privilege of a role.
+
+# transfer
+
+TBA
+
 # role levels
 
-You can assign role levels to users, privileges and role.
+You can assign role levels to users, privileges and roles.
 
 Examples:
 
 * When you have a privilege with the `admin role level`, you can assign this privilege only to a role with the same level.
 * You can't assign a user with a `user role level` to a role with an `admin role level`.
 
-## default 
-
-The `default` role level is the lowest one. 
+At the moment there are two role levels.
 
 ## user
 
@@ -30,24 +50,6 @@ The user role level is meant to be for logged in users.
 ## admin
 
 Every `privilege` can be assigned to the `admin` role level.
-
-# main tables
-
-## user\_account
-
-When a new `user_account` is created, the `maximum_role_level` decides, which `roles` can be assigned to the `user_account`.
-
-## privilege
-
-Privileges can be used inside of `rasmus` applications.
-A privilege can be connected with a `role`.
-You can only connect a `privilege` with a `role` with at least the same `role_level`.
-Every `privilege` have a `minimum_read_role_level` and a `minimum_write_role_level`.
-
-## role
-
-A `role` can hold multiple `privileges`.
-You can define read and write permissions for every privilege of a role.
 
 # post DDL scripts
 

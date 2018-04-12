@@ -1,5 +1,6 @@
 SET search_path TO core,public;
 
+-- these are some  test inserts to transfer
 INSERT INTO transfer (request) VALUES ('{"schema":"core", "entity":"privilege", "payload": {"name":"dasboard", "description": "show dashboard", "role_level":"guest"}}'::JSONB),
     ('{"schema":"core", "entity":"privilege", "payload": {"name":"news", "description": "show news feed", "role_level":"guest"}}'::JSONB),
     ('{"schema":"core", "entity":"role", "payload": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
@@ -7,7 +8,7 @@ INSERT INTO transfer (request) VALUES ('{"schema":"core", "entity":"privilege", 
     ('{"schema":"core", "entity":"role", "payload": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
     ('{"schema":"core", "entity":"user_account", "payload" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
 
-INSERT INTO privilege (name, description, minimum_read_role_level) VALUES ('dashboard', 'manage system dashboard', 'default');
+INSERT INTO privilege (name, description, minimum_read_role_level) VALUES ('dashboard', 'manage system dashboard', 'user');
 INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),
     ('role_management', 'work with systemwide role management'),
     ('privilege_management', 'work with systemwide privilege management');
@@ -16,6 +17,8 @@ INSERT INTO role (name, description, role_level) VALUES
     ('admin', 'the admin can do everything within the instance','admin');
 
 -- add all privileges to admin role with read and write permissions
+-- this is a test insert
+-- it will be removed in future
 DO $$
 DECLARE
     admin_role_id UUID;
