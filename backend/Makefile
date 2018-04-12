@@ -1,3 +1,5 @@
+.PHONY: compile run clean
+
 compile:
 	if [ ! -d deps/ ]; then mix deps.get; fi
 	mix compile
