@@ -16,7 +16,6 @@ CREATE TABLE user_account(
     json_view JSONB
 );
 
-
 -- todo: who can add/update/delete a role
 -- todo: seed base roles: admin, readonly
 -- json view -> role description with associated privileges
@@ -76,6 +75,10 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+--
+-- privilege trigger
+--
+
 CREATE FUNCTION privilege_has_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
     PERFORM set_roles_dirty_for_privilege_change(NEW.id);
@@ -84,6 +87,9 @@ BEGIN
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER privilege_update_trigger BEFORE UPDATE ON privilege
+    FOR EACH ROW EXECUTE PROCEDURE privilege_has_changed_trigger();
 
 CREATE FUNCTION privilege_has_been_deleted_trigger() RETURNS TRIGGER AS $$
 BEGIN
@@ -94,12 +100,12 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-
-CREATE TRIGGER privilege_update_trigger BEFORE UPDATE ON privilege
-    FOR EACH ROW EXECUTE PROCEDURE privilege_has_changed_trigger();
-
 CREATE TRIGGER privilege_delete_trigger BEFORE DELETE ON privilege
     FOR EACH ROW EXECUTE PROCEDURE privilege_has_been_deleted_trigger();
+
+--
+-- role trigger
+--
 
 CREATE FUNCTION role_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
@@ -122,6 +128,10 @@ CREATE TRIGGER role_update_trigger BEFORE UPDATE ON role
 
 CREATE TRIGGER role_delete_trigger AFTER DELETE ON role
     FOR EACH ROW EXECUTE PROCEDURE role_changed_trigger();
+
+--
+-- user_account trigger
+--
 
 CREATE FUNCTION user_account_changed() RETURNS TRIGGER AS $$
 BEGIN
@@ -216,6 +226,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- currently used for reset user_account views
 CREATE FUNCTION update_dirty_user_account() RETURNS VOID AS $$
 DECLARE 
     user_id UUID;
