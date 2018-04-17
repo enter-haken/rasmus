@@ -51,6 +51,10 @@ CREATE TABLE role_privilege(
     PRIMARY KEY (id_role, id_privilege)
 );
 
+--
+-- privilege triggers and functions
+--
+
 CREATE FUNCTION set_roles_dirty_for_privilege_change(privilege_id UUID) RETURNS VOID AS $$
 DECLARE
     current_role_id UUID;
@@ -62,22 +66,6 @@ BEGIN
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
-
-CREATE FUNCTION set_user_account_dirty_for_role_change(role_id UUID) RETURNS VOID AS $$
-DECLARE
-    current_id UUID;
-BEGIN
-    FOR current_id IN SELECT id_user_account FROM user_in_role WHERE id_role = role_id
-    LOOP
-        PERFORM set_user_account_dirty(current_id);
-        RAISE NOTICE 'user account % is set to dirty, because role % has changed', current_id, role_id;
-    END LOOP;
-END
-$$ LANGUAGE plpgsql;
-
---
--- privilege trigger
---
 
 CREATE FUNCTION privilege_has_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
@@ -104,8 +92,20 @@ CREATE TRIGGER privilege_delete_trigger BEFORE DELETE ON privilege
     FOR EACH ROW EXECUTE PROCEDURE privilege_has_been_deleted_trigger();
 
 --
--- role trigger
+-- role triggers and functions
 --
+
+CREATE FUNCTION set_user_account_dirty_for_role_change(role_id UUID) RETURNS VOID AS $$
+DECLARE
+    current_id UUID;
+BEGIN
+    FOR current_id IN SELECT id_user_account FROM user_in_role WHERE id_role = role_id
+    LOOP
+        PERFORM set_user_account_dirty(current_id);
+        RAISE NOTICE 'user account % is set to dirty, because role % has changed', current_id, role_id;
+    END LOOP;
+END
+$$ LANGUAGE plpgsql;
 
 CREATE FUNCTION role_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
