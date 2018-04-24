@@ -9,7 +9,8 @@ CREATE TABLE user_account(
     first_name VARCHAR(254),
     last_name VARCHAR(254),
     email_address VARCHAR(254) NOT NULL,
-    password VARCHAR(254), --> todo: not null -> generate and send mail with credentials
+    password VARCHAR(254),
+    salt VARCHAR(30) NOT NULL DEFAULT gen_salt('bf'),
     login VARCHAR(254) UNIQUE NOT NULL,
     signature VARCHAR(254),
     maximum_role_level role_level NOT NULL DEFAULT 'user',
@@ -147,8 +148,29 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION user_account_created() RETURNS TRIGGER AS $$
+DECLARE
+    password TEXT; 
+BEGIN
+    SELECT gen_salt('bf') INTO password;
+    RAISE NOTICE 'blank password: %', password;
+    RAISE NOTICE 'salt: %', NEW.salt;
+    SELECT crypt(password, NEW.salt) INTO password;
+    NEW.password = password;
+    RAISE NOTICE 'crypted password: %', NEW.password;
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_account_created_trigger BEFORE INSERT ON user_account
+    FOR EACH ROW EXECUTE PROCEDURE user_account_created();
+
 CREATE TRIGGER user_account_changed_trigger BEFORE UPDATE ON user_account
     FOR EACH ROW EXECUTE PROCEDURE user_account_changed();
+
+--
+-- update json views
+--
 
 CREATE FUNCTION get_role_view(role_id UUID) RETURNS JSONB AS $$
 DECLARE
