@@ -10,8 +10,8 @@ defmodule BackendApp do
     
     # List all child processes to be supervised
     children = [
-      { BackendWorker, credentials },
-      { InboundWorker, credentials }
+      { Core.Counter, credentials },
+      { Core.Inbound, credentials }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
