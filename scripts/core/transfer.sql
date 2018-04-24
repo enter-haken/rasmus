@@ -3,6 +3,7 @@ SET search_path TO core,public;
 CREATE TYPE transfer_state as ENUM (
     'pending',
     'processing',
+    'ready',
     'succeeded',
     'succeeded_with_warning',
     'error'
@@ -93,9 +94,8 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION finished() RETURNS TRIGGER AS $$
 BEGIN
     NEW.state = 'succeeded';
+    --todo: notify backend -> schema, entity, transfer id
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER finished_trigger AFTER UPDATE ON transfer
-    FOR EACH ROW EXECUTE PROCEDURE finished();
