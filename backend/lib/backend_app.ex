@@ -6,12 +6,12 @@ defmodule BackendApp do
   use Application
 
   def start(_type, _args) do
-
-    credentials = Application.get_env(:backend, :pg_config)     
+    credentials = Application.get_env(:backend, :pg_config) 
     
     # List all child processes to be supervised
     children = [
-      { BackendWorker, credentials } 
+      { BackendWorker, credentials },
+      { InboundWorker, credentials }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
