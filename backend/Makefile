@@ -5,7 +5,7 @@ compile:
 	mix compile
 
 run:
-	mix run --no-halt
+	iex -S mix run 
 
 clean: 
 	rm _build/ -rf
