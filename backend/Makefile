@@ -10,3 +10,6 @@ run:
 clean: 
 	rm _build/ -rf
 	rm deps/ -rf
+
+docs:
+	mix docs
