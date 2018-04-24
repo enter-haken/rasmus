@@ -20,7 +20,9 @@ defmodule Backend.Mixfile do
 
   defp deps do
     [
-      {:postgrex, ">= 0.13.1"}
+      # todo: move to version 1.6 when ready
+      {:postgrex, git: "https://github.com/elixir-ecto/postgrex.git", branch: "master"},
+      {:jason, "~> 1.0"}
     ]
   end
 end
