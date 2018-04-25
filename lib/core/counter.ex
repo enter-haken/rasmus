@@ -18,6 +18,7 @@ defmodule Core.Counter do
     {:ok, pid} = Postgrex.Notifications.start_link(pg_config)
     {:ok, ref} = Postgrex.Notifications.listen(pid, "core")
     
+    Logger.info("#{__MODULE__} started.")
     Logger.info("listening to changes for pid #{inspect(pid)}")
 
     {:ok, {pid, ref }}
@@ -29,7 +30,9 @@ defmodule Core.Counter do
   def handle_info({:notification, pid, ref, "core", payload},_) do
     case Jason.decode(payload) do
      {:ok , %{ "state" => "pending", "id" => id }} -> Core.Manager.perform(id)
-      _ -> Logger.warn("got unhandled notification: #{inspect(payload)}")
+     {:ok , %{ "id" => id, "action" => "set_dirty", "entity" => entity }} -> 
+       Logger.debug("got set_dirty for #{entity} #{id}. ToDo: send message to processes using this entity.")
+     _ -> Logger.warn("got unhandled notification: #{inspect(payload)}")
     end
     {:noreply, {pid, ref}}
   end
