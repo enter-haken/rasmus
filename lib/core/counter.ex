@@ -4,6 +4,8 @@ defmodule Core.Counter do
   """
   use GenServer
 
+  require Logger
+
   @doc false
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: :listener)
@@ -15,20 +17,19 @@ defmodule Core.Counter do
   def init(pg_config) do
     {:ok, pid} = Postgrex.Notifications.start_link(pg_config)
     {:ok, ref} = Postgrex.Notifications.listen(pid, "core")
-    IO.puts("listening to changes for pid #{inspect(pid)}")
+    
+    Logger.info("listening to changes for pid #{inspect(pid)}")
 
     {:ok, {pid, ref }}
   end
 
   @doc """
-  After a request is inserted into `transfer`, the `Core.Manager.perform/1` is started
+  After a request is inserted into `transfer`, the `Core.Manager.perform/1` is started.
   """
   def handle_info({:notification, pid, ref, "core", payload},_) do
-    IO.puts(payload)
-    IO.inspect(Jason.decode(payload))
     case Jason.decode(payload) do
      {:ok , %{ "state" => "pending", "id" => id }} -> Core.Manager.perform(id)
-      _ -> IO.puts("got unhandled notification: #{inspect(payload)}")
+      _ -> Logger.warn("got unhandled notification: #{inspect(payload)}")
     end
     {:noreply, {pid, ref}}
   end
@@ -37,7 +38,7 @@ defmodule Core.Counter do
   handle all other messages send to #{__MODULE__}
   """
   def handle_info(_, state) do
-    IO.puts("unhandled info: #{inspect(state)}")
+    Logger.warn("unhandled info: #{inspect(state)}")
     {:noreply, state}
   end
 end

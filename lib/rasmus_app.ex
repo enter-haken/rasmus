@@ -4,8 +4,11 @@ defmodule RasmusApp do
   @moduledoc false
 
   use Application
+  
+  require Logger
 
   def start(_type, _args) do
+    Logger.info("start rasmus application")
     credentials = Application.get_env(:rasmus, :pg_config) 
     
     # List all child processes to be supervised
