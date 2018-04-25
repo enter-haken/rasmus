@@ -6,5 +6,11 @@ config :rasmus, :pg_config,
   password: "postgres",
   database: "rasmus"
 
-config :logger, 
-  backends: [:console]
+config :logger, :console,
+  #format: "$time $metadata[$level] $message\n",
+  #metadata: [
+  #  :module,
+  #  :function
+  #] 
+  format: "$time [$level] $message\n"
+  
