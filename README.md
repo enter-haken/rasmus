@@ -25,23 +25,20 @@ The standard user `postgres` must exist to create the database for `rasmus`.
 
 ### compile
 
-When the sources are checked out for the first time, the `rasmus` database must be created
-
-    $ make first_time
-
 A simple 
 
     $ make
 
 will create the schema `core` and `cms` for `rasmus`.
-It will also compile the `elixir` backend.
+It will also compile the `elixir` backend and the documentation.
+
 At the moment, the database will be reseted on every `make` call.
 
 ## run
 
     $ make run
 
-Currently, the elixir shell is started with `--no-halt` and listen to database messages.
+The backend is started within the `iex` shell.
 
 # contact
 

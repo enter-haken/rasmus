@@ -20,9 +20,3 @@ clean:
 
 docs:
 	mix docs
-
-# on first time use, the rasmus db must be created
-first_time:
-	make -C ./scripts/core createdb
-
-
