@@ -7,10 +7,10 @@ config :rasmus, :pg_config,
   database: "rasmus"
 
 config :logger, :console,
-  #format: "$time $metadata[$level] $message\n",
-  #metadata: [
-  #  :module,
-  #  :function
-  #] 
-  format: "$time [$level] $message\n"
+  format: "$time $metadata[$level] $message\n",
+  metadata: [
+    :module
+    #:function
+  ] 
+  #format: "$time [$level] $message\n"
   
