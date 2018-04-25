@@ -1,4 +1,4 @@
-.PHONY: help clean generate seed createdb dropdb
+.PHONY: help clean generate seed createdb 
 help:
 	@echo "clean - drops schema core"
 	@echo "generate - create schema, insert tables..."
@@ -21,9 +21,8 @@ seed:
 	psql -U postgres -d rasmus -f seed.sql
 
 createdb:
-	createdb -U postgres rasmus
+	if [ `psql -U postgres -c "SELECT * from pg_database WHERE datname='rasmus'" | grep row | cut -c2` -eq "0" ]; then \
+		createdb -U postgres rasmus; \
+	fi;	
 
-dropdb:
-	dropdb -U postgres rasmus
-
-all: clean generate seed
+all: createdb clean generate seed

@@ -21,17 +21,20 @@ defmodule Core.Counter do
   end
 
   @doc """
-  Handles `core` notifications
+  After a request is inserted into `transfer`, the `Core.Manager.perform/1` is started
   """
   def handle_info({:notification, pid, ref, "core", payload},_) do
-    # NOTIFY response
-    IO.inspect(payload)
-    
+    IO.puts(payload)
+    IO.inspect(Jason.decode(payload))
+    case Jason.decode(payload) do
+     {:ok , %{ "state" => "pending", "id" => id }} -> Core.Manager.perform(id)
+      _ -> IO.puts("got unhandled notification: #{inspect(payload)}")
+    end
     {:noreply, {pid, ref}}
   end
 
   @doc """
-    handle all other messages send to #{__MODULE__}
+  handle all other messages send to #{__MODULE__}
   """
   def handle_info(_, state) do
     IO.puts("unhandled info: #{inspect(state)}")

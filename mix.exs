@@ -1,9 +1,9 @@
-defmodule Backend.Mixfile do
+defmodule Rasmus.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :backend,
+      app: :rasmus,
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
@@ -14,7 +14,7 @@ defmodule Backend.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {BackendApp, []}
+      mod: {RasmusApp, []}
     ]
   end
 
@@ -23,7 +23,7 @@ defmodule Backend.Mixfile do
       # todo: move to version 1.6 when ready
       {:postgrex, git: "https://github.com/elixir-ecto/postgrex.git", branch: "master"},
       {:jason, "~> 1.0"},
-      {:ex_doc, "~> 0.11", only: :dev}
+      {:ex_doc, "~> 0.11", only: :dev, runtime: false}
     ]
   end
 end

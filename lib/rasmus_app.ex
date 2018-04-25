@@ -1,4 +1,4 @@
-defmodule BackendApp do
+defmodule RasmusApp do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -11,12 +11,13 @@ defmodule BackendApp do
     # List all child processes to be supervised
     children = [
       { Core.Counter, credentials },
-      { Core.Inbound, credentials }
+      { Core.Inbound, credentials },
+      { Core.Manager, credentials }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Backend.Supervisor]
+    opts = [strategy: :one_for_one, name: Rasmus.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

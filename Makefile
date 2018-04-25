@@ -1,14 +1,28 @@
-.PHONY: all clean first_time
-all:
-	make -C ./scripts all
-	make -C ./backend
-clean:
-	make -C ./scripts clean
-	make -C ./backend clean
+.PHONY: compile run clean docs first_time init_database all
+
+all: init_database compile docs
+
+init_database:
+	make -C ./database_scripts all
+
+compile:
+	if [ ! -d deps/ ]; then mix deps.get; fi
+	mix compile
+
+run:
+	iex -S mix run 
+
+clean: 
+	rm _build/ -rf
+	rm deps/ -rf
+	rm doc/ -rf
+	make -C ./database_scripts clean
+
+docs:
+	mix docs
 
 # on first time use, the rasmus db must be created
 first_time:
 	make -C ./scripts/core createdb
 
-run:
-	make -C ./backend run
+

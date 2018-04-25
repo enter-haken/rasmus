@@ -23,14 +23,11 @@ CREATE TABLE transfer(
 );
 
 CREATE FUNCTION send_receipt() RETURNS TRIGGER AS $$
+DECLARE 
+    response JSONB;
 BEGIN 
-    --todo: make some base validation on the request object
-    -- eg. valid schema / entity / action
-    -- payload not null
-    -- ...
-
-    -- each schema has it's own listener channel
-    PERFORM pg_notify(NEW.request->>'schema', NEW.id::text);
+    response := '[]'::JSONB || (jsonb_build_object('id', NEW.id) || jsonb_build_object('state',NEW.state));
+    PERFORM pg_notify(NEW.request->>'schema', response->>0);
     -- actions could be launched here, but the trigger should return quickly
     RETURN NEW;
 END
@@ -45,8 +42,12 @@ CREATE TRIGGER send_receipt_trigger BEFORE INSERT ON transfer
 --
 --$$ LANGUAGE plpgsql;
 
-
-
+CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
+BEGIN
+    SELECT id, state, request FROM core.transfer WHERE id = transfer_id::UUID;
+    RAISE NOTICE 'manager';
+END
+$$ LANGUAGE plpgsql;
 
 
 
@@ -94,7 +95,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION finished() RETURNS TRIGGER AS $$
 BEGIN
     NEW.state = 'succeeded';
-    --todo: notify backend -> schema, entity, transfer id
+    --todo: notify backend -> schema, entity, transfer id, status
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
