@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :backend, :pg_config, 
+config :rasmus, :pg_config, 
   hostname: "localhost",
   username: "postgres",
   password: "postgres",

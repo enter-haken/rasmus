@@ -6,7 +6,7 @@ defmodule RasmusApp do
   use Application
 
   def start(_type, _args) do
-    credentials = Application.get_env(:backend, :pg_config) 
+    credentials = Application.get_env(:rasmus, :pg_config) 
     
     # List all child processes to be supervised
     children = [
