@@ -18,7 +18,7 @@ defmodule Core.Inbound do
   """
   def init(pg_config) do
     {:ok, pid} = Postgrex.start_link(pg_config)
-    Logger.info("InboundWorker started.")
+    Logger.info("#{__MODULE__} started.")
 
     {:ok, pid}
   end
@@ -28,12 +28,13 @@ defmodule Core.Inbound do
   """
   def handle_cast({:add, payload}, state) do
     case Postgrex.query(state, "INSERT INTO core.transfer (request) VALUES ($1)", [payload]) do
-      {:ok, result} -> Logger.info("added into transfer: #{inspect(result)}")
-      {:error, %{postgres: %{message: error}}} -> Logger.error("adding into transfer failed: #{inspect(error)}")
+      {:ok, result} -> Logger.debug("added into transfer: #{inspect(result)}")
+      #{:error, %{postgres: %{message: error}}} -> Logger.error("adding into transfer failed: #{inspect(error)}")
+      {:error, error} -> Logger.error("adding into transfer failed: #{inspect(error)}")
     end
     {:noreply, state }
   end
-
+  
   @doc """
   get one row from the transfer table.
   This will be removed
@@ -41,7 +42,7 @@ defmodule Core.Inbound do
   def handle_cast({:get}, state) do
     {:ok, result} = Postgrex.query(state, "SELECT * FROM core.transfer LIMIT 1",[])
 
-    Logger.info("select one row from transfer: #{inspect(result)}")
+    Logger.debug("select one row from transfer: #{inspect(result)}")
     {:noreply, state}
   end
   
