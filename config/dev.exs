@@ -5,3 +5,6 @@ config :rasmus, :pg_config,
   username: "postgres",
   password: "postgres",
   database: "rasmus"
+
+config :logger, 
+  backends: [:console]
