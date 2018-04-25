@@ -12,7 +12,7 @@ defmodule Core.Manager do
   def init(pg_config) do
     {:ok, pid} = Postgrex.start_link(pg_config)
     Logger.info("#{__MODULE__} started.")
-
+    
     {:ok, pid}
   end
 
@@ -20,7 +20,7 @@ defmodule Core.Manager do
   def handle_cast(transfer_id, state) do
     Logger.info("perform manager for transfer id: #{transfer_id}")
     case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
-      {:ok, result} -> Logger.info("manager performed: #{inspect(result)}")
+      {:ok, result} -> Logger.debug("manager performed: #{inspect(result)}")
       {:error, %{postgres: %{message: error}}} -> Logger.error("error during executing transfer manager: #{inspect(error)}")
     end
     {:noreply, state }
