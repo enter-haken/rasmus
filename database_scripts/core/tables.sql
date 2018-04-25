@@ -5,7 +5,7 @@ CREATE TYPE role_level AS ENUM ('admin','user');
 --todo: seed admin account? during install?
 --json view -> user + roles + privileges
 CREATE TABLE user_account(
-	id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name VARCHAR(254),
     last_name VARCHAR(254),
     email_address VARCHAR(254) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE user_account(
 -- todo: seed base roles: admin, readonly
 -- json view -> role description with associated privileges
 CREATE TABLE role(
-	id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(254) UNIQUE NOT NULL,
     description VARCHAR(254),
     role_level role_level NOT NULL DEFAULT 'user',
@@ -36,7 +36,7 @@ CREATE TABLE user_in_role(
 
 -- todo: seed application privileges on install
 CREATE TABLE privilege(
-	id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(80) UNIQUE NOT NULL,
     description VARCHAR(254),
     schema varchar(254) NOT NULL DEFAULT 'core',
