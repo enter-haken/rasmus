@@ -9,6 +9,14 @@ CREATE TYPE transfer_state as ENUM (
     'error'
 );
 
+CREATE TYPE transfer_action as ENUM (
+    'select',
+    'add',
+    'modify',
+    'delete',
+    'set_dirty'
+);
+
 -- the request must contain at least the following keys: 
 -- schema 
 -- entity
@@ -26,8 +34,9 @@ CREATE FUNCTION send_receipt() RETURNS TRIGGER AS $$
 DECLARE 
     response JSONB;
 BEGIN 
-    response := '[]'::JSONB || (jsonb_build_object('id', NEW.id) || jsonb_build_object('state',NEW.state));
-    PERFORM pg_notify(NEW.request->>'schema', response->>0);
+    --response := '[]'::JSONB || (jsonb_build_object('id', NEW.id) || jsonb_build_object('state',NEW.state));
+    --PERFORM pg_notify(NEW.request->>'schema', response->>0);
+    PERFORM send_message(NEW);
     -- actions could be launched here, but the trigger should return quickly
     RETURN NEW;
 END
@@ -37,18 +46,15 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER send_receipt_trigger BEFORE INSERT ON transfer
     FOR EACH ROW EXECUTE PROCEDURE send_receipt();
 
-
---CREATE FUNCTION process_receipt(transfer_id UUID) RETURNS VOID AS $$
---
---$$ LANGUAGE plpgsql;
-
 CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
+DECLARE
+    transfer_record RECORD;
 BEGIN
-    SELECT id, state, request FROM core.transfer WHERE id = transfer_id::UUID;
+    SELECT id, state, request, result FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
+    
     RAISE NOTICE 'manager';
 END
 $$ LANGUAGE plpgsql;
-
 
 
 -- update transfer states

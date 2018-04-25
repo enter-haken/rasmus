@@ -13,12 +13,49 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE FUNCTION get_entity(entity TEXT) RETURNS JSONB AS $$
 BEGIN
-    RETURN format('{ "entity": "%s", "is_dirty": false}', entity)::JSONB;
+    --todo: use jsonb_build_object
+    RETURN format('{ "entity": "%s", "is_dirty": false, "schema":"core"}', entity)::JSONB;
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION send_message(schema TEXT, entity TEXT, action TEXT, message TEXT) RETURNS VOID AS $$
+CREATE FUNCTION send_message(raw_transfer_row ANYELEMENT) RETURNS VOID AS $$
+DECLARE 
+    message_response JSONB;
+    transfer_row RECORD;
 BEGIN
-    PERFORM pg_notify(schema, format('{"schema":"%s","entity":"%s","action":"%s" "message":"%s"}', schema, entity, action, message));
+    transfer_row := raw_transfer_row::RECORD;
+    -- get an unescaped version of a json string
+    message_response := '[]' || (
+        jsonb_build_object('id', transfer_row.id) ||
+        jsonb_build_object('state', transfer_row.state) ||
+        jsonb_build_object('action', transfer_row.request->>'action') ||
+        jsonb_build_object('entity', transfer_row.request->>'entity')
+    );
+
+    RAISE NOTICE '%', message_response;
+
+    PERFORM pg_notify(transfer_row.request->>'schema', message_response->>0);
+
 END
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION send_dirty_message(raw_entity_record ANYELEMENT) RETURNS VOID AS $$
+DECLARE 
+    message_response JSONB;
+    entity_record RECORD;
+BEGIN
+    entity_record := raw_entity_record::RECORD;
+    -- get an unescaped version of a json string
+    message_response := '[]' || (
+        jsonb_build_object('id', entity_record.id) ||
+        jsonb_build_object('action', 'set_dirty') ||
+        jsonb_build_object('entity', entity_record.json_view->>'entity')
+    );
+
+    RAISE NOTICE 'set dirty: %', message_response;
+
+    PERFORM pg_notify(entity_record.json_view->>'schema', message_response->>0);
+END
+
+$$ LANGUAGE plpgsql;
+
