@@ -29,11 +29,14 @@ defmodule Core.Counter do
   """
   def handle_info({:notification, pid, ref, "core", payload},_) do
     case Jason.decode(payload) do
-     {:ok , %{ "state" => "pending", "id" => id }} -> Core.Manager.perform(id)
+     {:ok , %{ "id" => id, "state" => "pending", }} -> Core.Manager.perform(id)
+       
+     {:ok , %{ "id" => id, "state" => state, "entity" => entity, "action" => action }} -> 
+       Logger.debug("got a #{state} request for `#{action}` and #{entity} #{id}. ToDo: send message to processes using this entity.")
+
      {:ok , %{ "id" => id, "action" => "set_dirty", "entity" => entity }} -> 
        Logger.debug("got `set_dirty` for #{entity} #{id}. ToDo: send message to processes using this entity.")
-     {:ok , %{ "id" => id, "action" => "add", "entity" => entity }} -> 
-       Logger.debug("got `add` for #{entity} #{id}. ToDo: send message to processes using this entity.")
+
      _ -> Logger.warn("got unhandled notification: #{inspect(payload)}")
     end
     {:noreply, {pid, ref}}
