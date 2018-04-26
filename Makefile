@@ -1,4 +1,4 @@
-.PHONY: compile run clean docs first_time init_database all
+.PHONY: compile run clean docs first_time init_database all core_schema
 
 all: init_database compile docs
 
