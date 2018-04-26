@@ -29,7 +29,6 @@ defmodule Core.Inbound do
   def handle_cast({:add, payload}, state) do
     case Postgrex.query(state, "INSERT INTO core.transfer (request) VALUES ($1)", [payload]) do
       {:ok, result} -> Logger.debug("added into transfer: #{inspect(result)}")
-      #{:error, %{postgres: %{message: error}}} -> Logger.error("adding into transfer failed: #{inspect(error)}")
       {:error, error} -> Logger.error("adding into transfer failed: #{inspect(error)}. Tried to add #{inspect(payload)}")
     end
     {:noreply, state }
