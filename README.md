@@ -32,13 +32,21 @@ A simple
 will create the schema `core` and `cms` for `rasmus`.
 It will also compile the `elixir` backend and the documentation.
 
-At the moment, the database will be reseted on every `make` call.
+At the moment, the database will be reset on every `make` call.
 
 ## run
 
     $ make run
 
 The backend is started within the `iex` shell.
+
+## database schema
+
+When you have successfully executed `make` for the first time you can take a look at the database schema `core`.
+
+    $ make core_schema
+
+This will put a `core_schema.png` file into the projects root folder.
 
 # contact
 
