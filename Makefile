@@ -22,5 +22,5 @@ docs:
 	mix docs
 
 core_schema:
-	if [ ! -d schema/ ]; then git submodule update --init --recursive; fi
+	if [ ! -f schema/schema.sh ]; then git submodule update --init --recursive; fi
 	schema/schema.sh -u postgres -d rasmus -s core | dot -Tpng > core_schema.png
