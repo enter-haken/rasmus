@@ -30,7 +30,7 @@ defmodule Core.Inbound do
     case Postgrex.query(state, "INSERT INTO core.transfer (request) VALUES ($1)", [payload]) do
       {:ok, result} -> Logger.debug("added into transfer: #{inspect(result)}")
       #{:error, %{postgres: %{message: error}}} -> Logger.error("adding into transfer failed: #{inspect(error)}")
-      {:error, error} -> Logger.error("adding into transfer failed: #{inspect(error)}")
+      {:error, error} -> Logger.error("adding into transfer failed: #{inspect(error)}. Tried to add #{inspect(payload)}")
     end
     {:noreply, state }
   end
@@ -58,9 +58,16 @@ defmodule Core.Inbound do
 
   def add() do
     # force db error
-    add(%{"test" => 1})
+    # add(%{"test" => 1})
     # first insert tests
-    add(%{"entity" => "privilege", "payload" => %{"description" => "show dashboard", "name" => "dasboard", "role_level" => "guest"}, "schema" => "core"})
+    add(%{
+      "entity" => "privilege", 
+      "payload" => %{
+        "description" => "show dashboard", 
+        "name" => "dasboard", 
+        "role_level" => "guest"}, 
+      "schema" => "core", 
+      "action" => "add"})
   end
 
   def get() do

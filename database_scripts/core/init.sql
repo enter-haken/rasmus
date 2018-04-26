@@ -11,28 +11,22 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- when postgres is compiled with python support
 -- CREATE OR REPLACE LANGUAGE plpython3u;
 
--- this is the json_view base document
-CREATE FUNCTION get_entity(entity TEXT) RETURNS JSONB AS $$
-BEGIN
-    --todo: use jsonb_build_object
-    RETURN format('{ "entity": "%s", "is_dirty": false, "schema":"core"}', entity)::JSONB;
-END
-$$ LANGUAGE plpgsql;
+CREATE TYPE transfer_state as ENUM (
+    'pending',
+    'processing',
+    'ready',
+    'succeeded',
+    'succeeded_with_warning',
+    'error'
+);
 
-CREATE FUNCTION send_dirty_message(raw_entity_record ANYELEMENT) RETURNS VOID AS $$
-DECLARE 
-    message_response JSONB;
-    entity_record RECORD;
-BEGIN
-    entity_record := raw_entity_record::RECORD;
-    -- get an unescaped version of a json string
-    message_response := '[]' || (
-        jsonb_build_object('id', entity_record.id) ||
-        jsonb_build_object('action', 'set_dirty') ||
-        jsonb_build_object('entity', entity_record.json_view->>'entity')
-    );
+CREATE TYPE transfer_action as ENUM (
+    'select',
+    'add',
+    'modify',
+    'delete',
+    'set_dirty'
+);
 
-    PERFORM pg_notify(entity_record.json_view->>'schema', message_response->>0);
-END
-$$ LANGUAGE plpgsql;
+CREATE TYPE role_level AS ENUM ('admin','user');
 

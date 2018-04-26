@@ -31,7 +31,9 @@ defmodule Core.Counter do
     case Jason.decode(payload) do
      {:ok , %{ "state" => "pending", "id" => id }} -> Core.Manager.perform(id)
      {:ok , %{ "id" => id, "action" => "set_dirty", "entity" => entity }} -> 
-       Logger.debug("got set_dirty for #{entity} #{id}. ToDo: send message to processes using this entity.")
+       Logger.debug("got `set_dirty` for #{entity} #{id}. ToDo: send message to processes using this entity.")
+     {:ok , %{ "id" => id, "action" => "add", "entity" => entity }} -> 
+       Logger.debug("got `add` for #{entity} #{id}. ToDo: send message to processes using this entity.")
      _ -> Logger.warn("got unhandled notification: #{inspect(payload)}")
     end
     {:noreply, {pid, ref}}
