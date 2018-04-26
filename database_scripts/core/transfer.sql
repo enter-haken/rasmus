@@ -30,13 +30,31 @@ CREATE TABLE transfer(
     result JSONB
 );
 
+CREATE FUNCTION send_message(id UUID, state transfer_state, request JSONB, result JSONB) RETURNS VOID AS $$
+DECLARE 
+    message_response JSONB;
+BEGIN
+    -- get an unescaped version of a json string
+    message_response := '[]' || (
+        jsonb_build_object('id', id) ||
+        jsonb_build_object('state', state) ||
+        jsonb_build_object('action', request->>'action') ||
+        jsonb_build_object('entity', request->>'entity')
+    );
+
+    PERFORM pg_notify(request->>'schema', message_response->>0);
+END
+$$ LANGUAGE plpgsql;
+
 CREATE FUNCTION send_receipt() RETURNS TRIGGER AS $$
 DECLARE 
-    response JSONB;
+    new_record RECORD;
 BEGIN 
     --response := '[]'::JSONB || (jsonb_build_object('id', NEW.id) || jsonb_build_object('state',NEW.state));
     --PERFORM pg_notify(NEW.request->>'schema', response->>0);
-    PERFORM send_message(NEW);
+    --RAISE NOTICE 'RAW_NEW: %', NEW;
+
+    PERFORM core.send_message(NEW.id, NEW.state, NEW.request, NEW.result);
     -- actions could be launched here, but the trigger should return quickly
     RETURN NEW;
 END
