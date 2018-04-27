@@ -21,7 +21,8 @@ CREATE TRIGGER got_response_trigger AFTER UPDATE ON transfer
 
 
 -- after a row is inserted into the `transfer` table
--- the `transfer_manager` is called from the backend.
+-- the `transfer_manager` is called by the backend.
+
 -- here comes the heavy lifting
 CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
 DECLARE
@@ -29,6 +30,7 @@ DECLARE
 BEGIN
     SELECT id, state, request, result FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
 
+    -- after the manager has succeeded the transfer record can be set to `succeed`
     PERFORM core.set_succeeded(transfer_record.id);
 END
 $$ LANGUAGE plpgsql;

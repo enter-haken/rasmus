@@ -46,7 +46,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION send_message_on_set_dirty_trigger() RETURNS TRIGGER AS $$
 BEGIN
     IF (NEW.json_view->>'is_dirty')::BOOLEAN THEN
-        PERFORM send_dirty_message(NEW);
+        PERFORM send_dirty_message(NEW.id, NEW.json_view->>'schema', NEW.json_view->>'entity');
     END IF;
     RAISE NOTICE '% updated', NEW.json_view->>'entity';
     RETURN NEW;

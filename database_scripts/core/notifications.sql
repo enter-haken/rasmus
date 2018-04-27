@@ -2,24 +2,22 @@ SET search_path TO core,public;
 
 -- send a message to the backend, if a record is set to dirty
 -- the raw_entity_record must contain a json_view
-CREATE FUNCTION send_dirty_message(raw_entity_record ANYELEMENT) RETURNS VOID AS $$
+CREATE FUNCTION send_dirty_message(id UUID, schema TEXT, entity TEXT) RETURNS VOID AS $$
 DECLARE 
     message_response JSONB;
-    entity_record RECORD;
 BEGIN
-    entity_record := raw_entity_record::RECORD;
     -- get an unescaped version of a json string
     message_response := '[]' || (
-        jsonb_build_object('id', entity_record.id) ||
+        jsonb_build_object('id', id) ||
         jsonb_build_object('action', 'set_dirty') ||
-        jsonb_build_object('entity', entity_record.json_view->>'entity')
+        jsonb_build_object('entity', entity)
     );
 
-    PERFORM pg_notify(entity_record.json_view->>'schema', message_response->>0);
+    PERFORM pg_notify(schema, message_response->>0);
 END
 $$ LANGUAGE plpgsql;
 
--- send a message to the backend, when a new record is is inserted into transfer
+-- send a message to the backend, when a new record is inserted into transfer
 CREATE FUNCTION send_message(id UUID, state transfer_state, request JSONB, result JSONB) RETURNS VOID AS $$
 DECLARE 
     message_response JSONB;
