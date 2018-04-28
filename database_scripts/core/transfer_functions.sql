@@ -27,8 +27,17 @@ CREATE TRIGGER got_response_trigger AFTER UPDATE ON transfer
 CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
 DECLARE
     transfer_record RECORD;
+    response JSONB;
 BEGIN
     SELECT id, state, request, result FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
+
+    CASE transfer_record.request->>'entity'
+        WHEN 'role' THEN RAISE NOTICE 'perform role manager';
+        WHEN 'privilege' THEN RAISE NOTICE 'perform privilege manager';
+        WHEN 'user_account'  THEN RAISE NOTICE 'perform user_account manager';
+        ELSE RAISE EXCEPTION 'entity % unknown', entity
+            USING HINT = 'entity must one of role, privilege or user_account';
+    END CASE;
 
     -- after the manager has succeeded the transfer record can be set to `succeed`
     PERFORM core.set_succeeded(transfer_record.id);
