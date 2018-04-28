@@ -18,7 +18,7 @@ END
 $$ LANGUAGE plpgsql;
 
 -- send a message to the backend, when a new record is inserted into transfer
-CREATE FUNCTION send_message(id UUID, state transfer_state, request JSONB, result JSONB) RETURNS VOID AS $$
+CREATE FUNCTION send_message(id UUID, state transfer_state, request JSONB, response JSONB) RETURNS VOID AS $$
 DECLARE 
     message_response JSONB;
 BEGIN

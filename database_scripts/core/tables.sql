@@ -4,7 +4,7 @@ CREATE TABLE transfer(
     id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     state transfer_state NOT NULL DEFAULT 'pending',
     request JSONB NOT NULL,
-    result JSONB
+    response JSONB
 );
 
 --todo: seed admin account? during install?

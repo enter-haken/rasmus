@@ -8,7 +8,7 @@ SET search_path TO core,public;
 
 CREATE FUNCTION send_transfer_message() RETURNS TRIGGER AS $$
 BEGIN 
-    PERFORM core.send_message(NEW.id, NEW.state, NEW.request, NEW.result);
+    PERFORM core.send_message(NEW.id, NEW.state, NEW.request, NEW.response);
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -27,23 +27,35 @@ CREATE TRIGGER got_response_trigger AFTER UPDATE ON transfer
 CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
 DECLARE
     transfer_record RECORD;
-    response JSONB;
+    transfer_response JSONB;
 BEGIN
-    SELECT id, state, request, result FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
+    SELECT id, state, request, response FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
+    RAISE NOTICE '%', transfer_record;
 
     CASE transfer_record.request->>'entity'
-        WHEN 'role' THEN RAISE NOTICE 'perform role manager';
-        WHEN 'privilege' THEN RAISE NOTICE 'perform privilege manager';
-        WHEN 'user_account'  THEN RAISE NOTICE 'perform user_account manager';
-        ELSE RAISE EXCEPTION 'entity % unknown', entity
+        WHEN 'role' THEN RAISE EXCEPTION 'role manager missing';
+        WHEN 'privilege' THEN 
+            BEGIN
+                SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
+                RAISE NOTICE 'privilege manager response: %', transfer_response;
+                PERFORM core.set_response(transfer_id::UUID, transfer_response);
+            END;
+        WHEN 'user_account' THEN RAISE EXCEPTION 'user_account manager missing';
+        ELSE RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
             USING HINT = 'entity must one of role, privilege or user_account';
     END CASE;
 
     -- after the manager has succeeded the transfer record can be set to `succeed`
     PERFORM core.set_succeeded(transfer_record.id);
+    RAISE NOTICE '% updated', transfer_record.request->>'entity';
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION set_response(transfer_id UUID, transfer_response JSONB) RETURNS VOID AS $$
+BEGIN
+    UPDATE core.transfer SET response = transfer_response WHERE id = transfer_id;
+END
+$$ LANGUAGE plpgsql;
 
 -- update transfer states
 CREATE FUNCTION set_state(transfer_id UUID, new_state transfer_state) RETURNS VOID AS $$
