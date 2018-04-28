@@ -20,8 +20,12 @@ defmodule Core.Manager do
   def handle_cast(transfer_id, state) do
     Logger.info("perform manager for transfer id: #{transfer_id}")
     case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
-      {:ok, result} -> Logger.debug("manager performed: #{inspect(result)}")
-      {:error, %{postgres: %{message: error}}} -> Logger.error("error during executing transfer manager: #{inspect(error)}")
+      #{:ok, result} -> Logger.debug("manager performed: #{inspect(result)}")
+      {:ok, %{messages: messages}} -> Logger.debug("postgres NOTICE: #{inspect(Enum.map(messages,fn(x) -> x.message end))}")
+      {:error, %{postgres: %{code: :raise_exception, severity: "ERROR", message: message, hint: hint}}} -> Logger.error("postgres EXCEPTION: #{message}, hint: #{hint}")
+      {:error, %{postgres: %{code: :raise_exception, severity: "ERROR", message: message}}} -> Logger.error("postgres EXCEPTION: #{message}")
+      {:error, %{postgres: %{code: :undefined_function, severity: "ERROR", message: message}}} -> Logger.error("postgres missing function EXCEPTION: #{message}")
+      {:error,  error} -> Logger.error("error during executing transfer manager: #{inspect(error)}")
     end
     {:noreply, state }
   end
