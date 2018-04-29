@@ -49,5 +49,6 @@ BEGIN
     DELETE from privilege where name = 'dashboard';
 
 END
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
 
+INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege"}'::JSONB);

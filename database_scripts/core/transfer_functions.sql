@@ -8,6 +8,7 @@ SET search_path TO core,public;
 
 CREATE FUNCTION send_transfer_message() RETURNS TRIGGER AS $$
 BEGIN 
+    --todo: declare, when a message should be send to the backend?
     PERFORM core.send_message(NEW.id, NEW.state, NEW.request, NEW.response);
     RETURN NEW;
 END
