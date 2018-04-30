@@ -1,12 +1,12 @@
 SET search_path TO core,public;
 
 -- these are some  test inserts to transfer
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "payload": {"name":"dasboard", "description": "show dashboard", "role_level":"guest"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"privilege", "payload": {"name":"news", "description": "show news feed", "role_level":"guest"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"role", "payload": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"role", "payload": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"role", "payload": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"user_account", "payload" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
+INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dasboard", "description": "show dashboard", "role_level":"guest"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "role_level":"guest"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"user_account", "data" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
 
 INSERT INTO privilege (name, description, minimum_read_role_level) VALUES ('dashboard', 'manage system dashboard', 'user');
 INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),

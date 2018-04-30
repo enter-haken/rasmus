@@ -1,11 +1,5 @@
 SET search_path TO core,public;
 
--- the request must contain at least the following keys: 
--- schema 
--- entity
--- payload
--- action
-
 CREATE FUNCTION send_transfer_message() RETURNS TRIGGER AS $$
 BEGIN 
     --todo: declare, when a message should be send to the backend?
