@@ -30,7 +30,69 @@ You can define read and write permissions for every privilege of a role.
 
 # transfer
 
-TBA
+The `transfer` table is the entry point to the database.
+It has a `state` column, which indicates the current state of the request.
+The states are a first draft. They will be narrowed down to a minimum, when the development goes on.
+
+* `pending`: This is the default state, when a request is inserted.
+Pending means, that the request is not yet processed by the database.
+
+* `processing` is a kind of lock.
+The database is currently working on a request.
+
+* When a request has `succeeded`, a NOTIFY is send to the backend.
+
+* `succeeded_with_warning` is a successful request, but there are some hints in the response about possible errors.
+
+* When request fails, the request is set to an `error` state.
+There are additional information in the response object.
+
+## request
+
+The request must at least have the following structure.
+It is a kind of contract or interface, made with the database backend.
+
+    {
+        "action": "add",
+        "schema": "core",
+        "entity": "role",
+        "data": {
+            "somejson": "object"
+        }
+    }
+
+`ToDo`: add user specific data to request.
+
+## response
+
+The `response` column is filled, when the request is processed.
+A succeeded request will have an `data` object, with an optional `info` and `warning` field.
+
+    {
+        "warning": [
+            "the response has some issues",
+            "maybe one more"
+        ],
+        "info": [
+            "look at this info",
+            "this may be also interesting"
+        ],
+        "data": {
+            "result": "object"
+        }
+    }
+
+If an `error` occurs, the data field will be empty
+
+    {
+        "error": {
+            "message": "an error occured"
+        },
+        "data": null
+    }
+
+`ToDo`: Are the texts for warning, info and error sufficient? 
+Replace with more complex objects if necessary.
 
 # role levels
 
