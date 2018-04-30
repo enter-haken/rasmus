@@ -20,13 +20,5 @@ CREATE TYPE transfer_state as ENUM (
     'error'
 );
 
-CREATE TYPE transfer_action as ENUM (
-    'select',
-    'add',
-    'modify',
-    'delete',
-    'set_dirty'
-);
-
 CREATE TYPE role_level AS ENUM ('admin','user');
 
