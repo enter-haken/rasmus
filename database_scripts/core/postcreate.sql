@@ -48,7 +48,6 @@ BEGIN
     IF (NEW.json_view->>'is_dirty')::BOOLEAN THEN
         PERFORM send_dirty_message(NEW.id, NEW.json_view->>'schema', NEW.json_view->>'entity');
     END IF;
-    RAISE NOTICE '% updated', NEW.json_view->>'entity';
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
