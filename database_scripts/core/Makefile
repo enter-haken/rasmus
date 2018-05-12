@@ -13,9 +13,9 @@ generate:
 	psql -U postgres -d rasmus -f init.sql
 	psql -U postgres -d rasmus -f tables.sql
 	psql -U postgres -d rasmus -f notifications.sql
-	psql -U postgres -d rasmus -f transfer_functions.sql
+	psql -U postgres -d rasmus -f transfer.sql
+	psql -U postgres -d rasmus -f privilege.sql
 	psql -U postgres -d rasmus -f set_dirty_functions.sql
-	psql -U postgres -d rasmus -f manager.sql
 	psql -U postgres -d rasmus -f postcreate.sql
 
 seed:

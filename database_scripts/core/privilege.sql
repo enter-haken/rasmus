@@ -1,5 +1,15 @@
 SET search_path TO core,public;
 
+-- todo: seed application privileges on install
+CREATE TABLE privilege(
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(80) UNIQUE NOT NULL,
+    description VARCHAR(254),
+    schema varchar(254) NOT NULL DEFAULT 'core',
+    minimum_read_role_level role_level NOT NULL DEFAULT 'admin',
+    minimum_write_role_level role_level NOT NULL DEFAULT 'admin'
+);
+
 -- todo: detect generic operations
 CREATE FUNCTION privilege_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE privilege_response JSONB;
