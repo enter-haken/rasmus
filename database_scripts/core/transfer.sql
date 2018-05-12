@@ -1,5 +1,12 @@
 SET search_path TO core,public;
 
+CREATE TABLE transfer(
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    state transfer_state NOT NULL DEFAULT 'pending',
+    request JSONB NOT NULL,
+    response JSONB
+);
+
 CREATE FUNCTION send_transfer_message() RETURNS TRIGGER AS $$
 BEGIN 
     --todo: declare, when a message should be send to the backend?
@@ -25,20 +32,23 @@ DECLARE
     transfer_response JSONB;
 BEGIN
     SELECT id, state, request, response FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
-    RAISE NOTICE '%', transfer_record;
-
-    CASE transfer_record.request->>'entity'
-        WHEN 'role' THEN RAISE EXCEPTION 'role manager missing';
-        WHEN 'privilege' THEN 
-            BEGIN
-                SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
-                RAISE NOTICE 'privilege manager response: %', transfer_response;
-                PERFORM core.set_response(transfer_id::UUID, transfer_response);
-            END;
-        WHEN 'user_account' THEN RAISE EXCEPTION 'user_account manager missing';
-        ELSE RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
-            USING HINT = 'entity must one of role, privilege or user_account';
-    END CASE;
+    
+    --BEGIN
+        CASE transfer_record.request->>'entity'
+            WHEN 'role' THEN RAISE EXCEPTION 'role manager missing';
+            WHEN 'privilege' THEN 
+                BEGIN
+                    SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
+                    RAISE NOTICE 'privilege manager response: %', transfer_response;
+                    PERFORM core.set_response(transfer_id::UUID, transfer_response);
+                END;
+            WHEN 'user_account' THEN RAISE EXCEPTION 'user_account manager missing';
+            ELSE RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
+                USING HINT = 'entity must one of role, privilege or user_account';
+        END CASE;
+    --EXCEPTION
+    --    WHEN OTHERS THEN 
+    --        PERFORM set_error(transfer_id::UUID);
 
     -- after the manager has succeeded the transfer record can be set to `succeed`
     PERFORM core.set_succeeded(transfer_record.id);
@@ -67,6 +77,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_processing(transfer_id UUID) RETURNS VOID AS $$
 BEGIN
+ 
     PERFORM core.set_state(transfer_id, 'processing'); 
 END
 $$ LANGUAGE plpgsql;
