@@ -18,22 +18,27 @@ defmodule Core.Manager do
 
   @doc false
   def handle_cast(transfer_id, state) do
-    Logger.info("perform manager for transfer id: #{transfer_id}")
+    Logger.info("perform transfer_manager for transfer id: #{transfer_id}")
     case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
       #{:ok, result} -> Logger.debug("manager performed: #{inspect(result)}")
       {:ok, %{messages: messages}} -> 
-        Logger.debug("manager succeeded: #{inspect(Enum.map(messages,fn(x) -> x.message end))}")
+        Logger.debug("manager succeeded. pg_messages: #{inspect(Enum.map(messages,fn(x) -> x.message end))}")
+        set_succeeded_state(state, transfer_id)
 
       {:error, %{postgres: %{code: :raise_exception, severity: "ERROR", message: message, hint: hint}}} -> 
         Logger.error("postgres EXCEPTION: #{message}, hint: #{hint}")
-        
+        set_error_state(state, transfer_id)
+
       {:error, %{postgres: %{code: :raise_exception, severity: "ERROR", message: message}}} -> 
         Logger.error("postgres EXCEPTION: #{message}")
+        set_error_state(state, transfer_id)
 
       {:error, %{postgres: %{code: :undefined_function, severity: "ERROR", message: message}}} -> 
         Logger.error("postgres missing function EXCEPTION: #{message}")
+        set_error_state(state, transfer_id)
 
       {:error,  error} -> Logger.error("error during executing transfer manager: #{inspect(error)}")
+        set_error_state(state, transfer_id)
     end
     {:noreply, state }
   end
@@ -46,6 +51,14 @@ defmodule Core.Manager do
   """
   def perform(id) do
     GenServer.cast(:manager, id)
+  end
+
+  defp set_error_state(state, transfer_id) do
+    Postgrex.query(state, "SELECT core.set_error($1)", [transfer_id])
+  end
+
+  defp set_succeeded_state(state, transfer_id) do
+    Postgrex.query(state, "SELECT core.set_succeeded($1)", [transfer_id])
   end
 
 end
