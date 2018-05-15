@@ -20,10 +20,27 @@ defmodule Core.Manager do
   def handle_cast(transfer_id, state) do
     Logger.info("perform transfer_manager for transfer id: #{transfer_id}")
     case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
-      #{:ok, result} -> Logger.debug("manager performed: #{inspect(result)}")
+      #{:ok, result} -> Logger.debug("manager performed: #{inspect(result, pretty: true)}")
       {:ok, %{messages: messages}} -> 
-        Logger.debug("manager succeeded. pg_messages: #{inspect(Enum.map(messages,fn(x) -> x.message end))}")
-        set_succeeded_state(state, transfer_id)
+
+        if Enum.any?(messages, fn(x) -> x.severity == "WARNING" end) do
+          set_succeeded_with_warning_state(state, transfer_id)
+          Logger.debug("manager succeded with warnings: #{
+            inspect(
+              %{ 
+                notice: get_notice_messages(messages), 
+                warning: get_warning_messages(messages)
+              })
+          }")
+       else
+          set_succeeded_state(state,transfer_id)
+          Logger.debug("manager succeded:  #{
+            inspect(
+              %{ 
+                notice: get_notice_messages(messages), 
+              })
+          }")
+       end
 
       {:error, %{postgres: %{code: :raise_exception, severity: "ERROR", message: message, hint: hint}}} -> 
         Logger.error("postgres EXCEPTION: #{message}, hint: #{hint}")
@@ -54,11 +71,33 @@ defmodule Core.Manager do
   end
 
   defp set_error_state(state, transfer_id) do
-    Postgrex.query(state, "SELECT core.set_error($1)", [transfer_id])
+    case Postgrex.query(state, "SELECT core.set_error($1)", [transfer_id]) do
+      {:ok, _} -> Logger.debug("set state 'error' for #{transfer_id} succeeded")
+      _ -> Logger.error("set state 'error' for #{transfer_id} failed")
+    end
   end
 
   defp set_succeeded_state(state, transfer_id) do
-    Postgrex.query(state, "SELECT core.set_succeeded($1)", [transfer_id])
+    case Postgrex.query(state, "SELECT core.set_succeeded($1)", [transfer_id]) do
+      {:ok, _} -> Logger.debug("set state 'succeeded' for #{transfer_id} succeeded")
+      _ -> Logger.error("set state 'succeeded' for #{transfer_id} failed")
+    end
   end
+
+  defp set_succeeded_with_warning_state(state, transfer_id) do
+    case Postgrex.query(state, "SELECT core.set_succeeded_with_warning($1)", [transfer_id]) do
+      {:ok, _} -> Logger.debug("set state 'succeeded_with_warning' for #{transfer_id} succeeded")
+      _ -> Logger.error("set state 'succeeded_with_warning' for #{transfer_id} failed")
+    end
+  end
+
+  defp get_messages(messages, severity) do
+    messages 
+      |> Enum.filter(fn(x) -> x.severity == severity end) 
+      |> Enum.map(fn(x) -> x.message end)
+  end
+
+  defp get_warning_messages(messages), do: get_messages(messages, "WARNING") 
+  defp get_notice_messages(messages), do: get_messages(messages, "NOTICE")
 
 end
