@@ -1,5 +1,6 @@
 SET search_path TO core,public;
 
+-- this is the entry point to the database
 CREATE TABLE transfer(
     id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     state transfer_state NOT NULL DEFAULT 'pending',
@@ -15,15 +16,22 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- sends a receipt message to the counter after a new request is inserted
 CREATE TRIGGER send_receipt_trigger BEFORE INSERT ON transfer
     FOR EACH ROW EXECUTE PROCEDURE send_transfer_message();
 
+-- sends a receipt message to the counter after a request is updated
+-- only a state change will trigger a message
 CREATE TRIGGER got_response_trigger AFTER UPDATE ON transfer
-    FOR EACH ROW EXECUTE PROCEDURE send_transfer_message();
+    FOR EACH ROW 
+    WHEN (OLD.state IS DISTINCT FROM NEW.state)
+        EXECUTE PROCEDURE send_transfer_message();
 
 
 -- after a row is inserted into the `transfer` table
+-- a message is send to the backend. 
 -- the `transfer_manager` is called by the backend.
+-- this approach should lead to fast inserts into the `transfer` table 
 
 -- here comes the heavy lifting
 CREATE FUNCTION transfer_manager(transfer_id TEXT) RETURNS VOID AS $$
