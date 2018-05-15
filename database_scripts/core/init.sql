@@ -14,7 +14,6 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE transfer_state as ENUM (
     'pending',
     'processing',
-    'ready',
     'succeeded',
     'succeeded_with_warning',
     'error'
