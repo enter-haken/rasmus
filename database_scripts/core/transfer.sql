@@ -58,7 +58,7 @@ CREATE TRIGGER send_receipt_trigger BEFORE INSERT ON transfer
 -- only a state change will trigger a message
 CREATE TRIGGER got_response_trigger AFTER UPDATE ON transfer
     FOR EACH ROW 
-    WHEN (OLD.state IS DISTINCT FROM NEW.state AND NEW.state <> 'error')
+    WHEN (OLD.state IS DISTINCT FROM NEW.state)
         EXECUTE PROCEDURE send_transfer_message();
 
 -- the `transfer_manager` chooses the corresponding entity manager for further processing
@@ -80,6 +80,7 @@ BEGIN
            BEGIN
                SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
                RAISE NOTICE 'privilege manager response: %', transfer_response;
+               RAISE WARNING 'WARNING';
                PERFORM core.set_response(transfer_id::UUID, transfer_response);
            END;
        WHEN 'user_account' THEN 
@@ -129,7 +130,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION set_succeded_with_warning(transfer_id TEXT) RETURNS VOID AS $$
+CREATE FUNCTION set_succeeded_with_warning(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
     PERFORM core.set_state(transfer_id::UUID, 'succeeded_with_warning'); 
 END
