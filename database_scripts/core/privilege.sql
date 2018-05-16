@@ -42,6 +42,7 @@ BEGIN
     RAISE NOTICE '%', request;
 
     --todo: find a way to make one insert statement
+
     INSERT INTO core.privilege (name) VALUES (request#>>'{data,name}') RETURNING id INTO privilege_id;
 
     IF request#>'{data,description}' IS NOT NULL THEN
@@ -62,7 +63,6 @@ BEGIN
     
     SELECT row_to_json(p) FROM (SELECT id, name, description, schema, minimum_read_role_level, minimum_write_role_level FROM core.privilege WHERE id = privilege_id) p INTO response;
 
-    --RAISE NOTICE '%', response;
     RETURN response;
 
 END
@@ -71,7 +71,6 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION privilege_get_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE
     response JSONB;
-    data_name TEXT;
 BEGIN
     IF request->'data' IS NULL THEN
         SELECT array_to_json(array_agg(row_to_json(t)))
@@ -100,7 +99,6 @@ BEGIN
     END IF;
 
     IF request#>'{data,name}' IS NOT NULL THEN
-        data_name := ('%' || request#>>'{data,name}' || '%')
         SELECT array_to_json(array_agg(row_to_json(t)))
         FROM (
             SELECT id, 
@@ -109,7 +107,7 @@ BEGIN
                 schema, 
                 minimum_read_role_level, 
                 minimum_write_role_level 
-            FROM core.privilege WHERE name LIKE ('%' || data_name || '%')) t
+            FROM core.privilege WHERE name LIKE ('%' || (request#>>'{data,name}')::TEXT || '%')) t
         INTO response;
     END IF;
 

@@ -1,7 +1,7 @@
 SET search_path TO core,public;
 
 -- these are some  test inserts to transfer
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard2", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
+INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "minimum_read_role_level":"user"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
@@ -49,7 +49,6 @@ BEGIN
 
 END
 $$ LANGUAGE plpgsql;
-
 
 INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB);
 INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege"}'::JSONB);
