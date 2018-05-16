@@ -16,7 +16,6 @@ generate:
 	psql -U postgres -d rasmus -f privilege.sql
 	psql -U postgres -d rasmus -f role.sql
 	psql -U postgres -d rasmus -f user_account.sql
-	psql -U postgres -d rasmus -f set_dirty_functions.sql
 	psql -U postgres -d rasmus -f postcreate.sql
 
 seed:
