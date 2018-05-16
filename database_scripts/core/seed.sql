@@ -53,3 +53,21 @@ $$ LANGUAGE plpgsql;
 INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB);
 INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege"}'::JSONB);
 INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege", "data": { "name" : "dash"}}'::JSONB);
+
+DO $$
+DECLARE
+    privilege_id UUID;
+BEGIN
+    -- the transfer insert is async
+    PERFORM pg_sleep(1);
+    SELECT id INTO privilege_id FROM core.privilege WHERE "name" = 'dashboard';
+
+    INSERT INTO transfer (request) 
+        VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "name":"dashboard2"}}', privilege_id)::JSONB);
+
+    INSERT INTO transfer (request) 
+        VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "name":"dashboard3", "description" : "updated desc"}}', privilege_id)::JSONB);
+
+
+END
+$$ LANGUAGE plpgsql;

@@ -19,7 +19,7 @@ BEGIN
         WHEN 'get' THEN SELECT core.privilege_get_manager(request) INTO manager_result;
         WHEN 'add' THEN SELECT core.privilege_add_manager(request) INTO manager_result;
         WHEN 'delete' THEN SELECT core.privilege_delete_manager(request) INTO manager_result;
-        WHEN 'update' THEN RAISE EXCEPTION '% manager missing for %', request->>'action', request->>'entity';
+        WHEN 'update' THEN SELECT core.privilege_update_manager(request) INTO manager_result; 
         ELSE RAISE EXCEPTION 'unknown action `%`. aborting privilege manger', request->>'action';
     END CASE;
 
@@ -68,6 +68,93 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- todo: this must be more generic
+-- every time you must code this, you shoot into your leg
+CREATE FUNCTION privilege_update_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE 
+    response JSONB;
+    sql TEXT;
+    column_update_metadata JSONB;
+    current_column_update_metadata JSONB;
+BEGIN
+    IF request->'data' IS NULL THEN
+        RAISE EXCEPTION 'data must not be empty when updating privilege';
+    END IF;
+
+    IF request#>'{data,id}' IS NULL THEN
+        RAISE EXCEPTION 'the id field of the data node must not be empty';
+    END IF;
+
+    column_update_metadata := '[]'::JSONB;
+
+    IF request#>'{data,name}' IS NOT NULL THEN
+        column_update_metadata := column_update_metadata || jsonb_build_object(
+            'column','"name"',
+            'value', request#>>'{data,name}');
+    END IF;
+
+    IF request#>'{data,description}' IS NOT NULL THEN
+        column_update_metadata := column_update_metadata || jsonb_build_object(
+            'column','description',
+            'value', request#>>'{data,description}');
+    END IF;
+
+    IF request#>'{data,schema}' IS NOT NULL THEN
+        column_update_metadata := column_update_metadata || jsonb_build_object(
+            'column','schema',
+            'value', request#>>'{data,schema}');
+    END IF;
+
+    IF request#>'{data,minimum_read_role_level}' IS NOT NULL THEN
+        column_update_metadata := column_update_metadata || jsonb_build_object(
+            'column','minimum_read_role_level',
+            'value', request#>>'{data,minimum_read_role_level}',
+            'type','core.role_level');
+    END IF;
+
+    IF request#>'{data,minimum_write_role_level}' IS NOT NULL THEN
+        column_update_metadata := column_update_metadata || jsonb_build_object(
+            'column','minimum_write_role_level',
+            'value', request#>>'{data,minimum_write_role_level}',
+            'type','core.role_level');
+    END IF;
+
+    IF column_update_metadata = '[]'::JSONB THEN
+        RAISE EXCEPTION 'there is nothing to update for privilege %', request#>>'{data,id}';
+    END IF;
+
+    sql := 'UPDATE core.privilege SET ';
+    
+    FOR current_column_update_metadata in SELECT jsonb_array_elements(column_update_metadata)
+    LOOP
+        sql := sql || (current_column_update_metadata->>'column')::TEXT || ' = ''' || (current_column_update_metadata->>'value')::TEXT || '''';
+        IF current_column_update_metadata->'type' IS NOT NULL THEN
+            sql := sql || '::' || (current_column_update_metadata->>'type')::TEXT;
+        END IF;
+        sql := sql || ', ';
+        
+    END LOOP;
+
+    -- remove tailing ', '
+    SELECT INTO sql left(sql, (select length(sql) - 2));
+
+    sql := sql || ' WHERE id = ''' || (request#>>'{data,id}')::TEXT || '''::UUID';
+
+    EXECUTE sql;
+
+    SELECT row_to_json(p) FROM (SELECT 
+        id, 
+        name, 
+        description, 
+        schema, 
+        minimum_read_role_level, 
+        minimum_write_role_level FROM core.privilege 
+        WHERE id = (request#>>'{data,id}')::UUID) p INTO response;
+
+    RETURN response;
+END
+$$ LANGUAGE plpgsql;
+
 CREATE FUNCTION privilege_get_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE
     response JSONB;
@@ -107,7 +194,7 @@ BEGIN
                 schema, 
                 minimum_read_role_level, 
                 minimum_write_role_level 
-            FROM core.privilege WHERE name LIKE ('%' || (request#>>'{data,name}')::TEXT || '%')) t
+            FROM core.privilege WHERE "name" LIKE ('%' || (request#>>'{data,name}')::TEXT || '%')) t
         INTO response;
     END IF;
 
