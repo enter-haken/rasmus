@@ -18,12 +18,13 @@ BEGIN
     CASE request->>'action'
         WHEN 'get' THEN SELECT core.privilege_get_manager(request) INTO manager_result;
         WHEN 'add' THEN SELECT core.privilege_add_manager(request) INTO manager_result;
-        WHEN 'delete' THEN RAISE EXCEPTION '% manager missing for %', request->>'action', request->>'entity';
+        WHEN 'delete' THEN SELECT core.privilege_delete_manager(request) INTO manager_result;
         WHEN 'update' THEN RAISE EXCEPTION '% manager missing for %', request->>'action', request->>'entity';
         ELSE RAISE EXCEPTION 'unknown action `%`. aborting privilege manger', request->>'action';
     END CASE;
 
-    privilege_response := json_build_object('data', manager_result);
+    privilege_response :=  core.get_entity(request->>'entity')
+        || jsonb_build_object('data', manager_result);
 
     RETURN privilege_response; 
 END
@@ -40,6 +41,7 @@ BEGIN
 
     RAISE NOTICE '%', request;
 
+    --todo: find a way to make one insert statement
     INSERT INTO core.privilege (name) VALUES (request#>>'{data,name}') RETURNING id INTO privilege_id;
 
     IF request#>'{data,description}' IS NOT NULL THEN
@@ -67,6 +69,8 @@ END
 $$ LANGUAGE plpgsql;
 
 -- todo: how to react on the payload in data
+-- only react on id and name
+-- whenn data is empty select everything
 CREATE FUNCTION privilege_get_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE
     response JSONB;
@@ -83,6 +87,26 @@ BEGIN
             FROM core.privilege) t
         INTO response;
     END IF;
+
     RETURN response;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION privilege_delete_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE
+    response JSONB;
+BEGIN
+    IF request->'data' IS NULL THEN
+        RAISE EXCEPTION 'data must not be empty when deleting data from privilege';
+    END IF;
+    
+    IF request#>'{data,id}' IS NULL THEN
+        RAISE EXCEPTION 'the id field of the data node must not be empty';
+    END IF;
+
+    DELETE FROM privilege WHERE id = (request#>>'{data,id}')::UUID;
+
+    --todo: add a success object to result
+    RETURN request; 
 END
 $$ LANGUAGE plpgsql;

@@ -91,8 +91,6 @@ BEGIN
                    USING HINT = 'entity must one of role, privilege or user_account';
            END;
    END CASE;
-
-   RAISE NOTICE '% updated', transfer_record.request->>'entity';
 END
 $$ LANGUAGE plpgsql;
 

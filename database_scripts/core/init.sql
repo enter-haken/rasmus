@@ -21,3 +21,11 @@ CREATE TYPE transfer_state as ENUM (
 
 CREATE TYPE role_level AS ENUM ('admin','user');
 
+-- this is the json_view base document
+CREATE FUNCTION get_entity(entity TEXT) RETURNS JSONB AS $$
+BEGIN
+    RETURN format('{ "entity": "%s", "is_dirty": false, "schema":"core"}', entity)::JSONB;
+END
+$$ LANGUAGE plpgsql;
+
+
