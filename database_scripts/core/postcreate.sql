@@ -46,7 +46,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION send_message_on_set_dirty_trigger() RETURNS TRIGGER AS $$
 BEGIN
     IF (NEW.json_view->>'is_dirty')::BOOLEAN THEN
-        PERFORM send_dirty_message(NEW.id, NEW.json_view->>'schema', NEW.json_view->>'entity');
+        PERFORM core.send_dirty_message(NEW.id, NEW.json_view->>'schema', NEW.json_view->>'entity');
     END IF;
     RETURN NEW;
 END
@@ -64,7 +64,7 @@ BEGIN
         RAISE NOTICE 'create set_%_dirty(%_id  UUID)', current_table, current_table;
         EXECUTE format('CREATE FUNCTION core.set_%1$s_dirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
-            UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
+            UPDATE core.%1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
@@ -72,7 +72,7 @@ BEGIN
         RAISE NOTICE 'create set_%_undirty(%_id  UUID)', current_table, current_table;
         EXECUTE format('CREATE FUNCTION core.set_%1$s_undirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
-            UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''false'') 
+            UPDATE core.%1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''false'') 
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');

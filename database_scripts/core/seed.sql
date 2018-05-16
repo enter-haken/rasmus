@@ -43,7 +43,7 @@ BEGIN
     INSERT INTO user_in_role (id_user_account, id_role) VALUES
         (admin_user_id, admin_role_id);
 
-    PERFORM get_user_view(admin_user_id);
+    PERFORM core.get_user_view(admin_user_id);
 
     DELETE from privilege where name = 'dashboard';
 
@@ -62,11 +62,19 @@ BEGIN
     PERFORM pg_sleep(1);
     SELECT id INTO privilege_id FROM core.privilege WHERE "name" = 'dashboard';
 
+    -- some update test
     INSERT INTO transfer (request) 
         VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "name":"dashboard2"}}', privilege_id)::JSONB);
 
     INSERT INTO transfer (request) 
         VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "name":"dashboard3", "description" : "updated desc"}}', privilege_id)::JSONB);
+
+    SELECT id INTO privilege_id FROM core.privilege WHERE "name" = 'user_management';
+    RAISE NOTICE '%',privilege_id;
+    
+    INSERT INTO transfer (request) 
+        VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "description" : "user management_desc"}}', privilege_id)::JSONB);
+
 
 
 END
