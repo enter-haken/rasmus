@@ -1,14 +1,13 @@
 SET search_path TO core,public;
 
 -- these are some  test inserts to transfer
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dasboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
+INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard2", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "minimum_read_role_level":"user"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"user_account", "data" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
 
-INSERT INTO privilege (name, description, minimum_read_role_level) VALUES ('dashboard', 'manage system dashboard', 'user');
 INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),
     ('role_management', 'work with systemwide role management'),
     ('privilege_management', 'work with systemwide privilege management');
@@ -51,4 +50,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+
+INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB);
 INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege"}'::JSONB);
+INSERT INTO transfer (request) VALUES ('{"action":"get" , "schema":"core", "entity":"privilege", "data": { "name" : "dash"}}'::JSONB);

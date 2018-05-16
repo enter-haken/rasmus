@@ -68,12 +68,10 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
--- todo: how to react on the payload in data
--- only react on id and name
--- whenn data is empty select everything
 CREATE FUNCTION privilege_get_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE
     response JSONB;
+    data_name TEXT;
 BEGIN
     IF request->'data' IS NULL THEN
         SELECT array_to_json(array_agg(row_to_json(t)))
@@ -85,6 +83,33 @@ BEGIN
                 minimum_read_role_level, 
                 minimum_write_role_level 
             FROM core.privilege) t
+        INTO response;
+    END IF;
+
+    IF request#>'{data,id}' IS NOT NULL THEN
+        SELECT array_to_json(array_agg(row_to_json(t)))
+        FROM (
+            SELECT id, 
+                name, 
+                description, 
+                schema, 
+                minimum_read_role_level, 
+                minimum_write_role_level 
+            FROM core.privilege WHERE id = (request#>>'{data,id}')::UUID) t
+        INTO response;
+    END IF;
+
+    IF request#>'{data,name}' IS NOT NULL THEN
+        data_name := ('%' || request#>>'{data,name}' || '%')
+        SELECT array_to_json(array_agg(row_to_json(t)))
+        FROM (
+            SELECT id, 
+                name, 
+                description, 
+                schema, 
+                minimum_read_role_level, 
+                minimum_write_role_level 
+            FROM core.privilege WHERE name LIKE ('%' || data_name || '%')) t
         INTO response;
     END IF;
 
