@@ -19,6 +19,7 @@ defmodule Core.Manager do
   @doc false
   def handle_cast(transfer_id, state) do
     Logger.info("perform transfer_manager for transfer id: #{transfer_id}")
+
     case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
       #{:ok, result} -> Logger.debug("manager performed: #{inspect(result, pretty: true)}")
       {:ok, %{messages: messages}} -> 

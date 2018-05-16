@@ -10,13 +10,13 @@ $$ LANGUAGE plpgsql;
 -- privilege 
 --
 
-CREATE FUNCTION set_roles_dirty_for_privilege(privilege_id UUID) RETURNS VOID AS $$
+CREATE FUNCTION core.set_roles_dirty_for_privilege(privilege_id UUID) RETURNS VOID AS $$
 DECLARE
     current_role_id UUID;
 BEGIN
-    FOR current_role_id IN SELECT id_role FROM role_privilege WHERE id_privilege = privilege_id
+    FOR current_role_id IN SELECT id_role FROM core.role_privilege WHERE id_privilege = privilege_id
     LOOP
-        PERFORM set_role_dirty(current_role_id);
+        PERFORM core.set_role_dirty(current_role_id);
         RAISE NOTICE 'role % is set to dirty, because privilege % has been changed or deleted.', current_role_id, privilege_id;
     END LOOP;
 END
@@ -24,7 +24,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION privilege_has_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
-    PERFORM set_roles_dirty_for_privilege(NEW.id);
+    PERFORM core.set_roles_dirty_for_privilege(NEW.id);
     RAISE NOTICE 'privilege % has changed', NEW.id;
 
     RETURN NEW;
@@ -33,7 +33,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION privilege_has_been_deleted_trigger() RETURNS TRIGGER AS $$
 BEGIN
-    PERFORM set_roles_dirty_for_privilege(OLD.id);
+    PERFORM core.set_roles_dirty_for_privilege(OLD.id);
     RAISE NOTICE 'privilege % has been deleted', OLD.id;
 
     RETURN OLD;

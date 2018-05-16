@@ -62,7 +62,7 @@ BEGIN
         WHERE table_schema = 'core' AND column_name = 'json_view'
     LOOP
         RAISE NOTICE 'create set_%_dirty(%_id  UUID)', current_table, current_table;
-        EXECUTE format('CREATE FUNCTION set_%1$s_dirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
+        EXECUTE format('CREATE FUNCTION core.set_%1$s_dirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
             UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
                 WHERE id = %1$s_id;
@@ -70,16 +70,16 @@ BEGIN
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
         
         RAISE NOTICE 'create set_%_undirty(%_id  UUID)', current_table, current_table;
-        EXECUTE format('CREATE FUNCTION set_%1$s_undirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
+        EXECUTE format('CREATE FUNCTION core.set_%1$s_undirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
             UPDATE %1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''false'') 
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
         
-        RAISE NOTICE 'create %_send_message_on_set_dirty_trigger', current_table;
+        RAISE NOTICE 'create core.%_send_message_on_set_dirty_trigger', current_table;
         EXECUTE 'CREATE TRIGGER ' || current_table || '_send_message_on_set_dirty_trigger AFTER UPDATE ON ' || current_table ||
-            ' FOR EACH ROW EXECUTE PROCEDURE send_message_on_set_dirty_trigger();';
+            ' FOR EACH ROW EXECUTE PROCEDURE core.send_message_on_set_dirty_trigger();';
 
     END LOOP;
 END

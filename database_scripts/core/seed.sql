@@ -1,8 +1,8 @@
 SET search_path TO core,public;
 
 -- these are some  test inserts to transfer
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dasboard", "description": "show dashboard", "role_level":"guest"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "role_level":"guest"}}'::JSONB),
+INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"dasboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
+    ('{"action" : "add", "schema":"core", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "minimum_read_role_level":"user"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),

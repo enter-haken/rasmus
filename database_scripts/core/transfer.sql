@@ -79,8 +79,6 @@ BEGIN
        WHEN 'privilege' THEN 
            BEGIN
                SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
-               RAISE NOTICE 'privilege manager response: %', transfer_response;
-               RAISE WARNING 'WARNING';
                PERFORM core.set_response(transfer_id::UUID, transfer_response);
            END;
        WHEN 'user_account' THEN 
