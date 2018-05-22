@@ -7,6 +7,7 @@ SET search_path TO core,public;
 -- wich appears in the search path
 -- the default is the public schema 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE LANGUAGE  plpython3u;
 
 -- when postgres is compiled with python support
 -- CREATE OR REPLACE LANGUAGE plpython3u;

@@ -12,6 +12,7 @@ clean:
 generate:
 	psql -U postgres -d rasmus -f init.sql
 	psql -U postgres -d rasmus -f notifications.sql
+	psql -U postgres -d rasmus -f crud.sql
 	psql -U postgres -d rasmus -f transfer.sql
 	psql -U postgres -d rasmus -f privilege.sql
 	psql -U postgres -d rasmus -f role.sql
