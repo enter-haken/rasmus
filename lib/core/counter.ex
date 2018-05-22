@@ -6,6 +6,10 @@ defmodule Core.Counter do
 
   require Logger
 
+  # 
+  # gen_server functions
+  #
+  
   @doc false
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: :listener)

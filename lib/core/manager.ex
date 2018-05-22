@@ -3,6 +3,10 @@ defmodule Core.Manager do
 
   require Logger
 
+  #
+  # gen_server functions
+  #
+
   @doc false
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: :manager)
@@ -59,6 +63,10 @@ defmodule Core.Manager do
     end
     {:noreply, state }
   end
+
+  # 
+  # public functions
+  #
 
   @doc """
   Starts the corresponding database manager.
