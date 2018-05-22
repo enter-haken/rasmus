@@ -52,14 +52,54 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
 
     if not "id" in request["data"]:
         plpy.error("id must not be empty, when updating {}".format(request["entity"]))
-        
-    metadata = json.loads(plpy.execute(plpy.prepare("SELECT core.get_table_metadata($1)", ["jsonb"]), [raw_request])[0]["get_table_metadata"])
+
+    #todo: this should be cached
+    metadata = json.loads(plpy.execute(plpy.prepare(
+                "SELECT core.get_table_metadata($1)", ["jsonb"]), 
+                [raw_request])[0]["get_table_metadata"])
 
     sql = "UPDATE {}.{} SET ".format(request["schema"], request["entity"])
     sql += ", ".join([create_update_statement(k,v, metadata) for k,v in request["data"].items() if k != 'id'])
     sql += " WHERE id = '{}'::UUID".format(request["data"]["id"])
 
+    plpy.notice(sql)
+
     return sql 
-        
 $$ LANGUAGE plpython3u;
 
+CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
+    import json
+
+    def create_where_statement(col, value, metadata):
+        current_column = next(x for x in metadata if x["column_name"] == col)
+
+        if not current_column:
+            return ""
+
+        if current_column["udt_name"] in ["varchar","text"]:
+            return "{} LIKE '%{}%'".format(col,value)
+            
+        if current_column["udt_schema"] == "core":
+            return "{} = '{}'::{}".format(col,value, current_column["udt_name"])
+
+        return "{} = {}".format(col,value)
+
+    request = json.loads(raw_request)
+    
+    metadata = json.loads(plpy.execute(plpy.prepare(
+                "SELECT core.get_table_metadata($1)", ["jsonb"]), 
+                [raw_request])[0]["get_table_metadata"])
+
+    sql = "SELECT "
+    sql += ", ".join([x["column_name"] for x in metadata])
+    sql += " FROM {}.{}".format(request["schema"], request["entity"])
+
+    if "data" in request:
+        sql += " WHERE "
+        sql += " AND ".join([create_where_statement(k,v, metadata) for k,v in request["data"].items()])
+
+    plpy.notice(sql)
+
+    return sql
+
+$$ LANGUAGE plpython3u;

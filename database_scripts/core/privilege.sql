@@ -68,8 +68,6 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
--- todo: this must be more generic
--- every time you must code this, you shoot into your leg
 CREATE FUNCTION privilege_update_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE 
     response JSONB;
@@ -77,7 +75,6 @@ DECLARE
 BEGIN
 
     SELECT core.get_update_statement(request) INTO sql;
-    RAISE NOTICE '%', sql;
 
     EXECUTE sql;
 
@@ -98,45 +95,13 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION privilege_get_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE
     response JSONB;
+    sql TEXT;
 BEGIN
-    IF request->'data' IS NULL THEN
-        SELECT array_to_json(array_agg(row_to_json(t)))
-        FROM (
-            SELECT id, 
-                name, 
-                description, 
-                schema, 
-                minimum_read_role_level, 
-                minimum_write_role_level 
-            FROM core.privilege) t
-        INTO response;
-    END IF;
+    SELECT core.get_select_statement(request) INTO sql;
 
-    IF request#>'{data,id}' IS NOT NULL THEN
-        SELECT array_to_json(array_agg(row_to_json(t)))
-        FROM (
-            SELECT id, 
-                name, 
-                description, 
-                schema, 
-                minimum_read_role_level, 
-                minimum_write_role_level 
-            FROM core.privilege WHERE id = (request#>>'{data,id}')::UUID) t
-        INTO response;
-    END IF;
-
-    IF request#>'{data,name}' IS NOT NULL THEN
-        SELECT array_to_json(array_agg(row_to_json(t)))
-        FROM (
-            SELECT id, 
-                name, 
-                description, 
-                schema, 
-                minimum_read_role_level, 
-                minimum_write_role_level 
-            FROM core.privilege WHERE "name" LIKE ('%' || (request#>>'{data,name}')::TEXT || '%')) t
-        INTO response;
-    END IF;
+    sql := 'SELECT array_to_json(array_agg(row_to_json(t))) FROM (' || sql || ') t';
+    
+    EXECUTE sql INTO response;
 
     RETURN response;
 END
