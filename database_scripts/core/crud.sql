@@ -31,7 +31,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
     import json
 
-    def create_update_statement(col, value, metadata):
+    def create_update_statement(col, value, metadata, schema):
         current_column = next(x for x in metadata if x["column_name"] == col)
 
         if not current_column:
@@ -41,7 +41,7 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
             return "{} = '{}'".format(col,value)
             
         if current_column["udt_schema"] == "core":
-            return "{} = '{}'::core.{}".format(col,value, current_column["udt_name"])
+            return "{} = '{}'::{}.{}".format(col,value, schema, current_column["udt_name"])
 
         return "{} = {}".format(col,value)
 
@@ -58,7 +58,7 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
                 [raw_request])[0]["get_table_metadata"])
 
     sql = "UPDATE {}.{} SET ".format(request["schema"], request["entity"])
-    sql += ", ".join([create_update_statement(k,v, metadata) for k,v in request["data"].items() if k != 'id'])
+    sql += ", ".join([create_update_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items() if k != 'id'])
     sql += " WHERE id = '{}'::UUID".format(request["data"]["id"])
 
     return sql 
@@ -67,7 +67,7 @@ $$ LANGUAGE plpython3u;
 CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
     import json
 
-    def create_where_statement(col, value, metadata):
+    def create_where_statement(col, value, metadata, schema):
         current_column = next(x for x in metadata if x["column_name"] == col)
 
         if not current_column:
@@ -77,7 +77,7 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
             return "{} LIKE '%{}%'".format(col,value)
             
         if current_column["udt_schema"] == "core":
-            return "{} = '{}'::{}".format(col,value, current_column["udt_name"])
+            return "{} = '{}'::{}.{}".format(col,value, schema, current_column["udt_name"])
 
         return "{} = {}".format(col,value)
 
@@ -96,7 +96,7 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
     if "data" in request:
         sql += " WHERE "
-        sql += " AND ".join([create_where_statement(k,v, metadata) for k,v in request["data"].items()])
+        sql += " AND ".join([create_where_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items()])
 
     plpy.notice(sql)
 
@@ -107,7 +107,7 @@ $$ LANGUAGE plpython3u;
 CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
     import json
 
-    def create_value_statement(col, value, metadata):
+    def create_value_statement(col, value, metadata, schema):
         current_column = next(x for x in metadata if x["column_name"] == col)
 
         if not current_column:
@@ -117,7 +117,7 @@ CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
             return "'{}'".format(value)
             
         if current_column["udt_schema"] == "core":
-            return "'{}'::core.{}".format(value, current_column["udt_name"])
+            return "'{}'::{}.{}".format(value, schema, current_column["udt_name"])
 
         return value 
 
@@ -134,7 +134,7 @@ CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
     sql = "INSERT INTO {}.{} (".format(request["schema"], request["entity"])
     sql += ", ".join(x for x in request["data"].keys() if x != "id")
     sql += ") VALUES ("
-    sql += ", ".join([create_value_statement(k,v,metadata) for k,v in request["data"].items() if k != "id"])
+    sql += ", ".join([create_value_statement(k,v,metadata, request["schema"]) for k,v in request["data"].items() if k != "id"])
     sql += ") RETURNING id"
 
     plpy.notice(sql)
