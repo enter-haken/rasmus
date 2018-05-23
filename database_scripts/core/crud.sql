@@ -58,7 +58,7 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
                 [raw_request])[0]["get_table_metadata"])
 
     sql = "UPDATE {}.{} SET ".format(request["schema"], request["entity"])
-    sql += ", ".join([create_update_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items() if k != 'id'])
+    sql += ", ".join([x for x in [create_update_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items() if k != 'id'] if x])
     sql += " WHERE id = '{}'::UUID".format(request["data"]["id"])
 
     return sql 
@@ -93,7 +93,7 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
     if "data" in request:
         sql += " WHERE "
-        sql += " AND ".join([create_where_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items()])
+        sql += " AND ".join([x for x in [create_where_statement(k,v, metadata, request["schema"]) for k,v in request["data"].items()] if x])
 
     plpy.notice(sql)
 
@@ -131,7 +131,7 @@ CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
     sql = "INSERT INTO {}.{} (".format(request["schema"], request["entity"])
     sql += ", ".join(x for x in request["data"].keys() if x != "id")
     sql += ") VALUES ("
-    sql += ", ".join([create_value_statement(k,v,metadata, request["schema"]) for k,v in request["data"].items() if k != "id"])
+    sql += ", ".join([x for x in [create_value_statement(k,v,metadata, request["schema"]) for k,v in request["data"].items() if k != "id"] if x])
     sql += ") RETURNING id"
 
     plpy.notice(sql)
