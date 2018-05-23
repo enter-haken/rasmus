@@ -59,7 +59,7 @@ DECLARE
     privilege_id UUID;
 BEGIN
     -- the transfer insert is async
-    PERFORM pg_sleep(1);
+    PERFORM pg_sleep(3);
     SELECT id INTO privilege_id FROM core.privilege WHERE "name" = 'dashboard';
 
     -- some update test

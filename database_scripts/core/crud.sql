@@ -41,7 +41,7 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
             return "{} = '{}'".format(col,value)
             
         if current_column["udt_schema"] == "core":
-            return "{} = '{}'::{}".format(col,value, current_column["udt_name"])
+            return "{} = '{}'::core.{}".format(col,value, current_column["udt_name"])
 
         return "{} = {}".format(col,value)
 
@@ -50,10 +50,9 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
     if not "data" in request:
         plpy.error("data must not be empty for updating {}".format(request["entity"]))
 
-    if not "id" in request["data"]:
+    if not "id" in request["data"] or not request["data"]["id"]:
         plpy.error("id must not be empty, when updating {}".format(request["entity"]))
 
-    #todo: this should be cached
     metadata = json.loads(plpy.execute(plpy.prepare(
                 "SELECT core.get_table_metadata($1)", ["jsonb"]), 
                 [raw_request])[0]["get_table_metadata"])
@@ -61,8 +60,6 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
     sql = "UPDATE {}.{} SET ".format(request["schema"], request["entity"])
     sql += ", ".join([create_update_statement(k,v, metadata) for k,v in request["data"].items() if k != 'id'])
     sql += " WHERE id = '{}'::UUID".format(request["data"]["id"])
-
-    plpy.notice(sql)
 
     return sql 
 $$ LANGUAGE plpython3u;
@@ -84,6 +81,9 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
         return "{} = {}".format(col,value)
 
+    def create_pairs(request_data, meta_data):
+        left_metadata = [x for x in metadata if x["column_name"] in request_data.keys()]
+
     request = json.loads(raw_request)
     
     metadata = json.loads(plpy.execute(plpy.prepare(
@@ -102,4 +102,42 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
     return sql
 
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
+    import json
+
+    def create_value_statement(col, value, metadata):
+        current_column = next(x for x in metadata if x["column_name"] == col)
+
+        if not current_column:
+            return ""
+
+        if current_column["udt_name"] in ["varchar","text"]:
+            return "'{}'".format(value)
+            
+        if current_column["udt_schema"] == "core":
+            return "'{}'::core.{}".format(value, current_column["udt_name"])
+
+        return value 
+
+    request = json.loads(raw_request)
+
+    if not "data" in request:
+        plpy.error("data must not be empty for inserting {}".format(request["entity"]))
+
+    # -- get all available columns
+    metadata = json.loads(plpy.execute(plpy.prepare(
+                "SELECT core.get_table_metadata($1)", ["jsonb"]), 
+                [raw_request])[0]["get_table_metadata"])
+    
+    sql = "INSERT INTO {}.{} (".format(request["schema"], request["entity"])
+    sql += ", ".join(x for x in request["data"].keys() if x != "id")
+    sql += ") VALUES ("
+    sql += ", ".join([create_value_statement(k,v,metadata) for k,v in request["data"].items() if k != "id"])
+    sql += ") RETURNING id"
+
+    plpy.notice(sql)
+
+    return sql 
 $$ LANGUAGE plpython3u;

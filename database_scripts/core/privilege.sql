@@ -34,37 +34,27 @@ CREATE FUNCTION privilege_add_manager(request JSONB) RETURNS JSONB AS $$
 DECLARE 
     response JSONB;
     privilege_id UUID;
+    sql TEXT;
 BEGIN
     IF request->'data' IS NULL THEN
         RAISE EXCEPTION 'data must not be empty when adding new data to privilege';
     END IF;
 
-    RAISE NOTICE '%', request;
+    SELECT core.get_insert_statement(request) INTO sql;
 
-    --todo: find a way to make one insert statement
+    EXECUTE sql INTO privilege_id;
 
-    INSERT INTO core.privilege (name) VALUES (request#>>'{data,name}') RETURNING id INTO privilege_id;
-
-    IF request#>'{data,description}' IS NOT NULL THEN
-        UPDATE core.privilege SET description = request#>>'{data,description}' WHERE id = privilege_id;
-    END IF;
-
-    IF request#>'{data,schema}' IS NOT NULL THEN
-        UPDATE core.privilege SET schema = request#>>'{data,schema}' WHERE id = privilege_id;
-    END IF;
-
-    IF request#>'{data,minimum_read_role_level}' IS NOT NULL THEN
-        UPDATE core.privilege SET minimum_read_role_level = (request#>>'{data,minimum_read_role_level}')::core.role_level WHERE id = privilege_id;
-    END IF;
-
-    IF request#>'{data,minimum_write_role_level}' IS NOT NULL THEN
-        UPDATE core.privilege SET minimum_write_role_level = (request#>>'{data,minimum_write_role_level}')::core.role_level WHERE id = privilege_id;
-    END IF;
-    
-    SELECT row_to_json(p) FROM (SELECT id, name, description, schema, minimum_read_role_level, minimum_write_role_level FROM core.privilege WHERE id = privilege_id) p INTO response;
+    SELECT row_to_json(p) FROM (SELECT 
+        id, 
+        name, 
+        description, 
+        schema, 
+        minimum_read_role_level, 
+        minimum_write_role_level 
+        FROM core.privilege 
+        WHERE id = privilege_id) p INTO response;
 
     RETURN response;
-
 END
 $$ LANGUAGE plpgsql;
 
