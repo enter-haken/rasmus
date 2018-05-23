@@ -81,9 +81,6 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
         return "{} = {}".format(col,value)
 
-    def create_pairs(request_data, meta_data):
-        left_metadata = [x for x in metadata if x["column_name"] in request_data.keys()]
-
     request = json.loads(raw_request)
     
     metadata = json.loads(plpy.execute(plpy.prepare(
