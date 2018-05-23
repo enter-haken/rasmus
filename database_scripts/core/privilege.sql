@@ -36,10 +36,6 @@ DECLARE
     privilege_id UUID;
     sql TEXT;
 BEGIN
-    IF request->'data' IS NULL THEN
-        RAISE EXCEPTION 'data must not be empty when adding new data to privilege';
-    END IF;
-
     SELECT core.get_insert_statement(request) INTO sql;
 
     EXECUTE sql INTO privilege_id;
