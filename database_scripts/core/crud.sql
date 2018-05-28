@@ -64,7 +64,7 @@ CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
     return sql 
 $$ LANGUAGE plpython3u;
 
-CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
+CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN DEFAULT false) RETURNS TEXT AS $$
     import json
 
     def create_where_statement(col, value, metadata, schema):
@@ -88,7 +88,12 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
                 [raw_request])[0]["get_table_metadata"])
 
     sql = "SELECT "
-    sql += ", ".join([x["column_name"] for x in metadata])
+    if only_json_view:
+        # it is possible that the json view is null or dirty
+        sql += "id, json_view"
+    else:
+        sql += ", ".join([x["column_name"] for x in metadata])
+
     sql += " FROM {}.{}".format(request["schema"], request["entity"])
 
     if "data" in request:
@@ -99,6 +104,21 @@ CREATE FUNCTION get_select_statement(raw_request JSONB) RETURNS TEXT AS $$
 
     return sql
 
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION flatten_json_view_response(raw_views JSONB) RETURNS JSONB AS $$
+    import json
+
+    response = [x["json_view"] for x in json.loads(raw_views) if x and x["json_view"]]
+    
+    return json.dumps(response)
+$$ LANGUAGE plpython3u;
+
+CREATE FUNCTION get_ids_for_empty_or_dirty_views(raw_views JSONB) RETURNS JSONB AS $$
+    import json
+
+    result = json.dumps([{ "id" : x["id"] } for x in json.loads(raw_views) if not x['json_view'] or x['json_view']['is_dirty']])
+    return result;
 $$ LANGUAGE plpython3u;
 
 CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$

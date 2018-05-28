@@ -20,7 +20,98 @@ CREATE TABLE role_privilege(
 );
 
 --
--- privilege trigger for role changes / deletions
+-- manager functions
+--
+
+CREATE FUNCTION role_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE 
+    role_response JSONB;
+    manager_result JSONB;
+BEGIN
+    CASE request->>'action'
+        WHEN 'get' THEN SELECT core.role_get_manager(request) INTO manager_result;
+        WHEN 'add' THEN SELECT core.role_add_manager(request) INTO manager_result;
+        WHEN 'delete' THEN SELECT core.role_delete_manager(request) INTO manager_result;
+        WHEN 'update' THEN SELECT core.role_update_manager(request) INTO manager_result; 
+        ELSE RAISE EXCEPTION 'unknown action `%`. aborting privilege manger', request->>'action';
+    END CASE;
+
+    role_response :=  core.get_entity(request->>'entity')
+        || jsonb_build_object('data', manager_result);
+
+    RETURN role_response; 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION role_get_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE
+    response JSONB;
+    sql TEXT;
+    dirty_ids JSONB;
+    dirty_id JSONB;
+BEGIN
+    -- select only json view
+    SELECT core.get_select_statement(request,true) INTO sql;
+
+    sql := 'SELECT array_to_json(array_agg(row_to_json(t))) FROM (' || sql || ') t';
+    
+    EXECUTE sql INTO response;
+
+    SELECT core.get_ids_for_empty_or_dirty_views(response) INTO dirty_ids;
+    
+    IF FOUND THEN
+        RAISE NOTICE 'dirty or empty ids for %: %', request->>'entity',dirty_ids;
+
+        FOR dirty_id in SELECT * FROM jsonb_array_elements(dirty_ids)
+        LOOP
+            PERFORM core.get_role_view((dirty_id->>'id')::UUID);
+        END LOOP;
+        
+        EXECUTE sql INTO response;
+    END IF;
+    
+    SELECT core.flatten_json_view_response(response) INTO response;
+
+    RETURN response;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION role_add_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE 
+    response JSONB;
+    role_id UUID;
+    sql TEXT;
+BEGIN
+    SELECT core.get_insert_statement(request) INTO sql;
+
+    EXECUTE sql INTO role_id;
+
+    SELECT row_to_json(p) FROM (SELECT 
+        id, 
+        name, 
+        description, 
+        role_level
+        FROM core.role 
+        WHERE id = role_id) p INTO response;
+
+    RETURN response;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION role_delete_manager(request JSONB) RETURNS JSONB AS $$
+BEGIN
+    RAISE EXCEPTION 'role_delete_manager missing';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION role_update_manager(request JSONB) RETURNS JSONB AS $$
+BEGIN
+    RAISE EXCEPTION 'role_update_manager missing';
+END
+$$ LANGUAGE plpgsql;
+
+--
+-- set roles dirty, when privileges are changed or deleted
 -- 
 
 CREATE FUNCTION set_roles_dirty_for_privilege(privilege_id UUID) RETURNS VOID AS $$
@@ -68,9 +159,10 @@ DECLARE
     role_raw JSONB;
     role_privileges JSONB;
 BEGIN
-    IF EXISTS (SELECT 1 FROM core.role WHERE (json_view->>'is_dirty')::BOOLEAN = false) THEN
+    IF EXISTS (SELECT 1 FROM core.role WHERE json_view IS NOT NULL AND (json_view->>'is_dirty')::BOOLEAN = false) THEN
         SELECT json_view FROM core.role WHERE id = role_id INTO role_raw;
         RAISE NOTICE 'returning undirty role %', role_id;
+        RAISE NOTICE 'role: %', role_raw;
         RETURN role_raw;
     END IF;
 
@@ -89,7 +181,7 @@ BEGIN
 
     role_raw := role_raw
         || jsonb_build_object('privileges', role_privileges)
-        || get_entity('role');
+        || core.get_entity('role');
 
     UPDATE core.role set json_view = role_raw WHERE id = role_id;
     RAISE NOTICE 'update json_view for role %', role_id;
@@ -97,4 +189,3 @@ BEGIN
     RETURN role_raw;
 END
 $$ LANGUAGE plpgsql;
-

@@ -12,8 +12,9 @@ CREATE TABLE privilege(
 
 -- todo: detect generic operations
 CREATE FUNCTION privilege_manager(request JSONB) RETURNS JSONB AS $$
-DECLARE privilege_response JSONB;
-DECLARE manager_result JSONB;
+DECLARE 
+    privilege_response JSONB;
+    manager_result JSONB;
 BEGIN
     CASE request->>'action'
         WHEN 'get' THEN SELECT core.privilege_get_manager(request) INTO manager_result;

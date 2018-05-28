@@ -74,7 +74,8 @@ BEGIN
    CASE transfer_record.request->>'entity'
        WHEN 'role' THEN 
            BEGIN
-                RAISE EXCEPTION 'role manager missing for id %', transfer_record.id;
+                SELECT core.role_manager(transfer_record.request) INTO transfer_response;
+                PERFORM core.set_response(transfer_id::UUID, transfer_response);
            END;
        WHEN 'privilege' THEN 
            BEGIN

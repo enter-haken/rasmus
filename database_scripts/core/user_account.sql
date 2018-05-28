@@ -43,12 +43,12 @@ BEGIN
     
     -- todo: generic check for other entity values changes
     IF OLD.json_view IS NULL OR NEW.json_view <> OLD.json_view THEN
-        RAISE NOTICE 'Only the json_view for role % has changed. The role it self does not change.', NEW.id;
+        RAISE NOTICE 'user_account: Only the json_view for role % has changed. The role it self does not change.', NEW.id;
         RETURN NEW;
     END IF;
 
     NEW.json_view = jsonb_set(NEW.json_view, '{is_dirty}', 'true');
-    RAISE NOTICE 'role % is set to to dirty', NEW.id;
+    RAISE NOTICE 'user_account: role % is set to to dirty', NEW.id;
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -67,7 +67,7 @@ CREATE FUNCTION user_account_changed() RETURNS TRIGGER AS $$
 BEGIN
     -- todo: generic check for other entity values changes
     IF OLD.json_view IS NULL OR NEW.json_view <> OLD.json_view THEN
-        RAISE NOTICE 'Only the json_view for role % has changed. The role it self does not change.', NEW.id;
+        RAISE NOTICE 'user_account: Only the json_view for role % has changed. The role it self does not change.', NEW.id;
         RETURN NEW;
     END IF;
 

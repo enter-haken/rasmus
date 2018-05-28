@@ -74,8 +74,9 @@ BEGIN
     
     INSERT INTO transfer (request) 
         VALUES (format('{"action" : "update", "schema":"core", "entity":"privilege", "data": {"id" : "%1$s", "description" : "user management_desc"}}', privilege_id)::JSONB);
-
-
-
 END
 $$ LANGUAGE plpgsql;
+
+INSERT INTO transfer (request) 
+        VALUES ('{"action" : "get", "schema":"core", "entity":"role"}'::JSONB);
+
