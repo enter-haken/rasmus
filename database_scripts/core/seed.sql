@@ -80,3 +80,12 @@ $$ LANGUAGE plpgsql;
 INSERT INTO transfer (request) 
         VALUES ('{"action" : "get", "schema":"core", "entity":"role"}'::JSONB);
 
+DO $$
+DECLARE
+    role_id UUID;
+BEGIN
+    SELECT id FROM core.role WHERE name = 'guest' INTO role_id;
+    INSERT INTO transfer (request)
+        VALUES (format('{"action":"delete", "schema":"core","entity":"role", "data":{"id":"%1$s"}}', role_id)::JSONB);
+END
+$$ LANGUAGE plpgsql;

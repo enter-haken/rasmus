@@ -99,8 +99,21 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION role_delete_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE
+    response JSONB;
 BEGIN
-    RAISE EXCEPTION 'role_delete_manager missing';
+    IF request->'data' IS NULL THEN
+        RAISE EXCEPTION 'data must not be empty when deleting data from role';
+    END IF;
+    
+    IF request#>'{data,id}' IS NULL THEN
+        RAISE EXCEPTION 'the id field of the data node must not be empty';
+    END IF;
+
+    DELETE FROM core.role WHERE id = (request#>>'{data,id}')::UUID;
+
+    --todo: add a success object to result
+    RETURN request; 
 END
 $$ LANGUAGE plpgsql;
 

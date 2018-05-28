@@ -32,7 +32,7 @@ BEGIN
     FOR current_user_account_id IN SELECT id_user_account FROM core.user_in_role WHERE id_role = role_id
     LOOP
         PERFORM core.set_user_account_dirty(current_user_account_id);
-        RAISE NOTICE 'user account % is set to dirty, because role % has changed', current_user_account_id, role_id;
+        RAISE NOTICE 'user account % is set to dirty, because role % has been deleted or changed', current_user_account_id, role_id;
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
@@ -53,11 +53,18 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION role_deleted_trigger() RETURNS TRIGGER AS $$
+BEGIN
+    PERFORM core.set_user_account_dirty_for_role(OLD.id);
+    RETURN OLD;
+END
+$$ LANGUAGE plpgsql;
+
 CREATE TRIGGER role_update_trigger BEFORE UPDATE ON role
     FOR EACH ROW EXECUTE PROCEDURE role_changed_trigger();
 
 CREATE TRIGGER role_delete_trigger AFTER DELETE ON role
-    FOR EACH ROW EXECUTE PROCEDURE role_changed_trigger();
+    FOR EACH ROW EXECUTE PROCEDURE role_deleted_trigger();
 
 --
 -- user_account related change / deletion triggers
