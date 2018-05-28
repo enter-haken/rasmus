@@ -107,7 +107,10 @@ DECLARE
     user_roles JSONB;
     role_id UUID;
 BEGIN
-    IF EXISTS (SELECT 1 FROM core.user_account WHERE (json_view->>'is_dirty')::BOOLEAN = false) THEN
+    IF EXISTS (SELECT 1 FROM core.user_account WHERE 
+            json_view IS NOT NULL AND 
+            (json_view->>'is_dirty')::BOOLEAN = false AND 
+            id = user_id) THEN
         SELECT json_view FROM core.user_account WHERE id = user_id INTO user_raw;
         RAISE NOTICE 'returning undirty user_account %', user_id;
         RETURN user_raw;

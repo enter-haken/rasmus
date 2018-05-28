@@ -159,10 +159,12 @@ DECLARE
     role_raw JSONB;
     role_privileges JSONB;
 BEGIN
-    IF EXISTS (SELECT 1 FROM core.role WHERE json_view IS NOT NULL AND (json_view->>'is_dirty')::BOOLEAN = false) THEN
+    IF EXISTS (SELECT 1 FROM core.role WHERE 
+            json_view IS NOT NULL AND 
+            (json_view->>'is_dirty')::BOOLEAN = false AND 
+            id = role_id) THEN
         SELECT json_view FROM core.role WHERE id = role_id INTO role_raw;
         RAISE NOTICE 'returning undirty role %', role_id;
-        RAISE NOTICE 'role: %', role_raw;
         RETURN role_raw;
     END IF;
 
