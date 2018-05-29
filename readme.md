@@ -34,7 +34,7 @@ It will also compile the `elixir` backend and the documentation.
 
 At the moment, the database will be reset on every `make` call.
 
-## run
+### run
 
     $ make run
 
