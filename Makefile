@@ -23,7 +23,7 @@ clean:
 
 .PHONY: docs
 docs:
-	mix docs
+	mix docs -o api-doc
 
 .PHONY: core_schema
 core_schema:

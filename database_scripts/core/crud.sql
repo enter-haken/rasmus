@@ -28,6 +28,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- todo: exclude created_at, updated_at
 CREATE FUNCTION get_update_statement(raw_request JSONB) RETURNS TEXT AS $$
     import json
 
