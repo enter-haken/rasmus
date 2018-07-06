@@ -1,12 +1,15 @@
 # rasmus
 
-a alternative content management system approach
+show how information is connected within a graph 
 
 This is a *pre alpha* version.
 
 ## motivation
 
-see [Alternative content management system approach](http://enter-haken.github.io/posts/2018-02-19-rasmus.html).
+As I worked on an [alternative content management system approach](http://enter-haken.github.io/posts/2018-02-19-rasmus.html),
+I came up with an idea to show browser links in an alternative way.
+In a first step, I will visualize browser links in a graph like visualisation.
+
 More progress on this work will be published on [enter-haken](http://enter-haken.github.io).
 
 ## stack
@@ -21,6 +24,8 @@ More progress on this work will be published on [enter-haken](http://enter-haken
 * elixir 1.5.2 with erlang >= 20
 * PostgreSQL >= 9.0
 
+For building the landing page there is also a requirement for `nodejs` and globaly installed `gulp`
+
 The standard user `postgres` must exist to create the database for `rasmus`.
 
 ### compile
@@ -29,7 +34,7 @@ A simple
 
     $ make
 
-will create the schema `core` and `cms` for `rasmus`.
+will create the schema `core` for `rasmus`.
 It will also compile the `elixir` backend and the documentation.
 
 At the moment, the database will be reset on every `make` call.
