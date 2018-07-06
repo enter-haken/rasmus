@@ -24,7 +24,7 @@ More progress on this work will be published on [enter-haken](http://enter-haken
 * elixir 1.5.2 with erlang >= 20
 * PostgreSQL >= 9.0
 
-For building the landing page there is also a requirement for `nodejs` and globaly installed `gulp`
+For building the landing page there is also a requirement for `nodejs` and globally installed `gulp`
 
 The standard user `postgres` must exist to create the database for `rasmus`.
 
