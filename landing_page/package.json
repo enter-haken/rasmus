@@ -1,0 +1,36 @@
+{
+    "title": "Rasmus",
+    "name": "landing-page",
+    "version": "0.0.1",
+    "description": "Landing page for rasmus",
+    "keywords": [
+        "css",
+        "sass",
+        "html",
+        "responsive"
+    ],
+    "homepage": "https://enter-haken.github.io/rasmus",
+    "bugs": {
+        "url": "https://github.com/enter-haken/rasmus/issues",
+        "email": "jan_hake@gmx.de"
+    },
+    "license": "APACHE 2.0",
+    "author": "Jan Hake",
+    "contributors": [
+        "Jan Hake (http://enter-haken.github.io/)"
+    ],
+    "dependencies": {
+        "bootstrap": "4.1.1",
+        "font-awesome": "4.7.0",
+        "jquery": "^3.3.1"
+    },
+    "devDependencies": {
+        "browser-sync": "2.24.3",
+        "gulp": "^3.9.1",
+        "gulp-clean-css": "3.9.4",
+        "gulp-header": "2.0.5",
+        "gulp-rename": "^1.2.2",
+        "gulp-sass": "4.0.1",
+        "gulp-uglify": "3.0.0"
+    }
+}

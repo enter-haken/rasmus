@@ -1,0 +1,37 @@
+body,
+html {
+    height : 100%;
+    width : 100%;
+    background-color: $primary-dark !important;
+}
+
+section {
+    padding: 1em;
+}
+
+img {
+    padding: 1em;
+}
+
+.logo {
+    background-image: url('/img/rasmus.png');
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.primary {
+    background-color: $primary-dark !important;
+    color: $primary-light !important;
+}
+
+.secondary {
+    background-color: $primary-light !important;
+    color: $primary-dark !important;
+    border-radius: 20px;
+}
+
+.feature {
+    padding: 2em;
+}
+
+
