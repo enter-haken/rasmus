@@ -7,7 +7,7 @@ init_database:
 
 .PHONY: compile
 compile:
-	if [ ! -d deps/ ]; then mix deps.get; fi
+	if [ ! -d deps ]; then mix deps.get; fi
 	mix compile
 
 .PHONY: run
