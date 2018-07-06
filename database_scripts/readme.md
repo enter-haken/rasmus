@@ -12,9 +12,9 @@ all these entities can be defined as you like.
 
 # main tables
 
-## user\_account
+## user
 
-The `user_account` holds information about a `rasmus user`.
+The `user` holds information about a `rasmus user`.
 You have to provide at least a `login` and an `email_address`.
 
 ## privilege

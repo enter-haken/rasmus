@@ -23,20 +23,20 @@ BEGIN
     FOR row IN SELECT tablename FROM pg_tables WHERE schemaname = 'core'
     LOOP
         RAISE NOTICE 'added created_at column to %', row.tablename;
-        EXECUTE 'ALTER TABLE ' || row.tablename ||
-            ' ADD COLUMN created_at timestamp NOT NULL DEFAULT NOW();';
+        EXECUTE 'ALTER TABLE "' || row.tablename ||
+            '" ADD COLUMN created_at timestamp NOT NULL DEFAULT NOW();';
 
         RAISE NOTICE 'added updated_at column to %', row.tablename;
-        EXECUTE 'ALTER TABLE ' || row.tablename ||
-            ' ADD COLUMN updated_at timestamp NOT NULL DEFAULT NOW();';
+        EXECUTE 'ALTER TABLE "' || row.tablename ||
+            '" ADD COLUMN updated_at timestamp NOT NULL DEFAULT NOW();';
         
         RAISE NOTICE 'added deleted_at column to %', row.tablename;
-        EXECUTE 'ALTER TABLE ' || row.tablename ||
-            ' ADD COLUMN deleted boolean NOT NULL DEFAULT false';
+        EXECUTE 'ALTER TABLE "' || row.tablename ||
+            '" ADD COLUMN deleted boolean NOT NULL DEFAULT false';
 
         RAISE NOTICE 'create %_metadata_trigger', row.tablename;
-        EXECUTE 'CREATE TRIGGER ' || row.tablename || '_metadata_trigger BEFORE UPDATE ON ' || row.tablename ||
-            ' FOR EACH ROW EXECUTE PROCEDURE metadata_trigger();';
+        EXECUTE 'CREATE TRIGGER ' || row.tablename || '_metadata_trigger BEFORE UPDATE ON "' || row.tablename ||
+            '" FOR EACH ROW EXECUTE PROCEDURE metadata_trigger();';
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
@@ -64,7 +64,7 @@ BEGIN
         RAISE NOTICE 'create set_%_dirty(%_id  UUID)', current_table, current_table;
         EXECUTE format('CREATE FUNCTION core.set_%1$s_dirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
-            UPDATE core.%1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
+            UPDATE core."%1$s" SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''true'') 
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
@@ -72,14 +72,14 @@ BEGIN
         RAISE NOTICE 'create set_%_undirty(%_id  UUID)', current_table, current_table;
         EXECUTE format('CREATE FUNCTION core.set_%1$s_undirty(%1$s_id UUID) RETURNS VOID AS %2$s%2$s
         BEGIN
-            UPDATE core.%1$s SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''false'') 
+            UPDATE core."%1$s" SET json_view = jsonb_set(json_view, ''{is_dirty}'', ''false'') 
                 WHERE id = %1$s_id;
         END
         %2$s%2$s LANGUAGE plpgsql;', current_table, '$');
         
         RAISE NOTICE 'create core.%_send_message_on_set_dirty_trigger', current_table;
-        EXECUTE 'CREATE TRIGGER ' || current_table || '_send_message_on_set_dirty_trigger AFTER UPDATE ON ' || current_table ||
-            ' FOR EACH ROW EXECUTE PROCEDURE core.send_message_on_set_dirty_trigger();';
+        EXECUTE 'CREATE TRIGGER ' || current_table || '_send_message_on_set_dirty_trigger AFTER UPDATE ON "' || current_table ||
+            '" FOR EACH ROW EXECUTE PROCEDURE core.send_message_on_set_dirty_trigger();';
 
     END LOOP;
 END

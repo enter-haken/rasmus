@@ -24,7 +24,8 @@ SET search_path TO core,public;
 -- entity:
 -- * `role`
 -- * `privilege`
--- * `user_account`
+-- * `user`
+-- * `link`
 
 -- schema:
 -- * `core` -> the current schema for the operation
@@ -82,14 +83,14 @@ BEGIN
                SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
                PERFORM core.set_response(transfer_id::UUID, transfer_response);
            END;
-       WHEN 'user_account' THEN 
+       WHEN 'user' THEN 
            BEGIN 
-               RAISE EXCEPTION 'user_account manager missing';
+               RAISE EXCEPTION 'user manager missing';
            END;
        ELSE 
            BEGIN
                RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
-                   USING HINT = 'entity must one of role, privilege or user_account';
+                   USING HINT = 'entity must one of role, privilege or user';
            END;
    END CASE;
 END

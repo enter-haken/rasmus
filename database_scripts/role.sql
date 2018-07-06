@@ -118,10 +118,43 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION role_update_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE
+    response JSONB;
+    sql TEXT;
 BEGIN
-    RAISE EXCEPTION 'role_update_manager missing';
+    SELECT core.get_update_statement(request) INTO sql;
+
+    EXECUTE sql;
+    
+    PERFORM core.update_privileges_for_role_if_necessary(request);
+
+    RETURN core.get_role_view((request#>>'{data,id}')::JSONB, true);
+    
 END
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION update_privileges_for_role_if_necessary(raw_request JSONB) RETURNS JSONB AS $$
+    import json
+
+    request = json.loads(raw_request)
+
+    if not "data" in request or not "privileges" in request['data']:
+        return json.dumps([])
+
+    # -- get current privileges
+    # -- diff current privileges with requested ones
+    # -- delete privilege relations for current privileges, which are not in requested
+    # -- add privilege relations for requested privileges, which ar not in current privileges
+    # -- update known privileges if necessary
+
+    # -- TODO: use crud functions
+
+
+    current_role_privileges = plpy.execute(plpy.prepare("SELECT id_role, id_privilege, can_read, can_write FROM role_privilege WHERE id = $  "))
+    
+    return json.dumps([])
+
+$$ LANGUAGE plpython3u;
 
 --
 -- set roles dirty, when privileges are changed or deleted
@@ -167,12 +200,12 @@ CREATE TRIGGER privilege_delete_trigger BEFORE DELETE ON privilege
 -- role json_view functions
 --
 
-CREATE FUNCTION get_role_view(role_id UUID) RETURNS JSONB AS $$
+CREATE FUNCTION get_role_view(role_id UUID, dirty_read BOOLEAN DEFAULT false) RETURNS JSONB AS $$
 DECLARE
     role_raw JSONB;
     role_privileges JSONB;
 BEGIN
-    IF EXISTS (SELECT 1 FROM core.role WHERE 
+    IF dirty_read OR EXISTS (SELECT 1 FROM core.role WHERE 
             json_view IS NOT NULL AND 
             (json_view->>'is_dirty')::BOOLEAN = false AND 
             id = role_id) THEN

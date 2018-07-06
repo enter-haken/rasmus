@@ -6,7 +6,7 @@ INSERT INTO transfer (request) VALUES ('{"action" : "add", "schema":"core", "ent
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
     ('{"action" : "add", "schema":"core", "entity":"role", "data": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
-    ('{"action" : "add", "schema":"core", "entity":"user_account", "data" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
+    ('{"action" : "add", "schema":"core", "entity":"user", "data" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
 
 INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),
     ('role_management', 'work with systemwide role management'),
@@ -37,10 +37,10 @@ BEGIN
     --todo: workflow: insert into transfer with email address
     --todo: workflow: add admin role to newly created admin user
     --todo: workflow: send email with password to new site admin
-    INSERT INTO user_account (login,email_address, maximum_role_level) VALUES
+    INSERT INTO "user" (login, email_address, maximum_role_level) VALUES
         ('admin','admin@admin.com', 'admin') RETURNING id into admin_user_id;
 
-    INSERT INTO user_in_role (id_user_account, id_role) VALUES
+    INSERT INTO user_in_role (id_user, id_role) VALUES
         (admin_user_id, admin_role_id);
 
     PERFORM core.get_user_view(admin_user_id);
