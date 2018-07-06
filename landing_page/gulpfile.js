@@ -45,6 +45,11 @@ gulp.task('index', function() {
     .pipe(gulp.dest('./dist'))
 });
 
+gulp.task('readme', function() {
+  gulp.src('./gh_docs_readme/readme.md')
+    .pipe(gulp.dest('./dist'))
+});
+
 gulp.task('images', function() {
   gulp.src('./img/*')
   .pipe(gulp.dest('./dist/img'))
@@ -77,7 +82,7 @@ gulp.task('css:minify', ['css:compile'], function() {
 gulp.task('css', ['css:compile', 'css:minify']);
 
 // Default task
-gulp.task('default', ['index', 'images', 'css', 'vendor']);
+gulp.task('default', ['index', 'readme', 'images', 'css', 'vendor']);
 
 gulp.task('deploy', function() {
     gulp.src('./dist/**')
