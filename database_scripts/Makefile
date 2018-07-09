@@ -17,6 +17,11 @@ generate:
 	psql -U postgres -d rasmus -f privilege.sql
 	psql -U postgres -d rasmus -f role.sql
 	psql -U postgres -d rasmus -f user_account.sql
+	psql -U postgres -d rasmus -f link.sql
+	psql -U postgres -d rasmus -f person.sql 
+	psql -U postgres -d rasmus -f appointment.sql 
+	psql -U postgres -d rasmus -f list.sql 
+	psql -U postgres -d rasmus -f graph_edge.sql
 	psql -U postgres -d rasmus -f postcreate.sql
 
 seed:
@@ -27,4 +32,4 @@ createdb:
 		createdb -U postgres rasmus; \
 	fi;	
 
-all: createdb clean generate seed
+all: createdb clean generate 
