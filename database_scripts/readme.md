@@ -1,16 +1,4 @@
-# core schema
-
-The core schema provide information about
-
-* the user
-* the roles
-* and the privileges
-
-of `rasmus`.
-
-all these entities can be defined as you like.
-
-# main tables
+# base database tables 
 
 ## user
 
@@ -27,6 +15,27 @@ A privilege can be assigned to a `role`.
 
 A `role` can hold multiple `privileges`.
 You can define read and write permissions for every privilege of a role.
+
+## person
+
+Used for storing `contacts`
+
+## link
+
+Storing web links.
+
+## list
+
+todo lists.
+
+## appointment
+
+single or group appointments
+
+## graph_edge
+
+This table stores all information neccessary to build a graph.
+You can build edges over all entities (currently `person`, `link`, `list` and `appointment`).
 
 # transfer
 
