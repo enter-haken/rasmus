@@ -14,6 +14,7 @@ compile:
 
 .PHONY: run
 run:
+	if [ ! -d _build ]; then make; fi
 	iex -S mix run 
 
 .PHONY: clean
