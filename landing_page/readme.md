@@ -6,6 +6,8 @@ You can take a look at
 
 [http://enter-haken.github.io/rasmus](http://enter-haken.github.io/rasmus)
 
+The page will be updated permanently.
+
 ## build requirements
 
     $ npm install -g gulp
@@ -27,7 +29,7 @@ The folder `./dist` will be removed.
 
     $ make deep_clean
 
-The folder``./node_modules` will be removed.
+The folder``./node_modules` and `dist` will be deleted.
 
 ## deploy
 

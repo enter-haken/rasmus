@@ -12,7 +12,7 @@ will build the project.
 
     $ make deploy
 
-will copy the build result to `../priv/static`.
+will build the project if necessary and copy the build result to `../priv/static`.
 
     $ make all
 

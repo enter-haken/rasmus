@@ -44,9 +44,16 @@ A simple
     $ make
 
 will create the schema `core` for `rasmus`.
+At the moment, the database will be reset on every `make` call.
+
 It will also compile the `elixir` backend, the documentation, the frontend and the landing page.
 
-At the moment, the database will be reset on every `make` call.
+When you need an update for either the `frontend` or the `landing_page` you need to
+
+    $ make deploy
+
+the projects.
+
 
 ### run
 
