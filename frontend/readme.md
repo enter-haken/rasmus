@@ -1,6 +1,6 @@
 # rasmus frontend
 
-The `rasmus` frontend uses [react][react] and [materia ui][material]. 
+The `rasmus` frontend uses [react][react] and [material ui][material]. 
 
 # build
 
