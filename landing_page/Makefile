@@ -9,6 +9,7 @@ build:
 .PHONY: deploy
 deploy:
 	rm ../docs -rf
+	if [ ! -d dist ]; then make; fi
 	gulp deploy
 
 .PHONY: clean
