@@ -33,6 +33,14 @@ defmodule Web.Router do
     |> send_file(200, "priv/static/index.html")
   end
 
+  # a simple test:
+  #
+  # $ curl -H "Content-Type: application/json" -d '{ "name" : "steve" }' http://127.0.0.1:8080/api
+  # {"response":"ok"}
+  #
+  # $ curl -H "Content-Type: application/json" -d '{ "name2" : "steve" }' http://127.0.0.1:8080/api
+  # {"response":"error"}
+
   post "/api" do
     Logger.info("#{inspect(conn, pretty: true)}")
 
