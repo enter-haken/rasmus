@@ -8,7 +8,8 @@ init_database:
 .PHONY: compile
 compile:
 	if [ ! -d deps ]; then mix deps.get; fi
-	if [ ! -d docs ]; then make -C ./landing_page all; fi
+	if [ ! -d landing_page/dist ]; then make -C ./landing_page; fi
+	if [ ! -d frontend/dist ]; then make -C ./frontend/; fi
 	mix compile
 
 .PHONY: run
@@ -21,7 +22,8 @@ clean:
 	rm deps/ -rf
 	rm api-doc/ -rf
 	make -C ./database_scripts clean
-	make -C ./landing_page clean deep_clean
+	make -C ./landing_page deep_clean
+	make -C ./frontend deep_clean
 
 .PHONY: docs
 docs:

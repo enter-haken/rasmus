@@ -21,13 +21,21 @@ More progress on this work will be published on [enter-haken](http://enter-haken
 
 ### requirements
 
+For the backend
+
 * elixir 1.5.2 with erlang >= 20
 * PostgreSQL >= 9.0
 
-For building the landing page there is also a requirement for `nodejs` and globally installed `gulp`. 
-This is an optional step.
-
 The standard user `postgres` must exist to create the database for `rasmus`.
+
+For the `frontend`
+
+* nodejs >= 8.11
+* yarn >= 1.6.0
+
+For the `landing page`  
+* npm >= 6.0.1
+* gulp >= 3.9.1
 
 ### compile
 
@@ -36,7 +44,7 @@ A simple
     $ make
 
 will create the schema `core` for `rasmus`.
-It will also compile the `elixir` backend and the documentation.
+It will also compile the `elixir` backend, the documentation, the frontend and the landing page.
 
 At the moment, the database will be reset on every `make` call.
 

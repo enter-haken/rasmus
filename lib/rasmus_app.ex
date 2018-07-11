@@ -15,7 +15,9 @@ defmodule RasmusApp do
     children = [
       { Core.Counter, credentials },
       { Core.Inbound, credentials },
-      { Core.Manager, credentials }
+      { Core.Manager, credentials },
+      { Plug.Adapters.Cowboy2, scheme: :http, plug: Web.Router, options: [port: 8080] }
+
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

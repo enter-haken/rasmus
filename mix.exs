@@ -13,7 +13,7 @@ defmodule Rasmus.Mixfile do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :cowboy, :plug],
       mod: {RasmusApp, []}
     ]
   end
@@ -23,7 +23,9 @@ defmodule Rasmus.Mixfile do
       # todo: move to version 1.6 when ready
       {:postgrex, git: "https://github.com/elixir-ecto/postgrex.git", branch: "master"},
       {:jason, "~> 1.0"},
-      {:ex_doc, "~> 0.11", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.11", only: :dev, runtime: false},
+      {:cowboy, "~> 2.4"},
+      {:plug, "~> 1.4"}
     ]
   end
 end
