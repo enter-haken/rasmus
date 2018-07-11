@@ -1,9 +1,11 @@
+PACKAGE_MANAGER = 'yarn'
+
 .PHONY: default
 default: build
 
 .PHONY: build
 build:
-	if [ ! -d node_modules/ ]; then npm install; fi
+	if [ ! -d node_modules/ ]; then $(PACKAGE_MANAGER) install; fi
 	gulp
 
 .PHONY: deploy
