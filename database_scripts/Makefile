@@ -32,4 +32,4 @@ createdb:
 		createdb -U postgres rasmus; \
 	fi;	
 
-all: createdb clean generate 
+all: createdb clean generate seed

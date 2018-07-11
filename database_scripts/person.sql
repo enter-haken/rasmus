@@ -59,13 +59,6 @@ CREATE TABLE person_address(
   PRIMARY KEY (id_person, id_address)
 );
 
-CREATE TABLE person_edge(
-    id_first_person UUID NOT NULL REFERENCES person(id) ON DELETE CASCADE,
-    id_second_person UUID NOT NULL REFERENCES person(id) ON DELETE CASCADE,
-    weight INTEGER NOT NULL DEFAULT 1,
-    PRIMARY KEY (id_first_person, id_second_person)
-);
-
 --todo:
 -- add chat
 -- add social media / private and work

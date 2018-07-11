@@ -1,4 +1,4 @@
-# base database tables 
+# database tables 
 
 ## user
 
@@ -18,7 +18,7 @@ You can define read and write permissions for every privilege of a role.
 
 ## person
 
-Used for storing `contacts`
+Used for storing `contacts`.
 
 ## link
 
@@ -36,10 +36,13 @@ single or group appointments
 
 This table stores all information neccessary to build a graph.
 You can build edges over all entities (currently `person`, `link`, `list` and `appointment`).
+It is is a sparsely populated table. 
+It describes the edges between the nodes / entities.
 
 # transfer
 
 The `transfer` table is the entry point to the database.
+It has no dependencies to other database tables.
 It has a `state` column, which indicates the current state of the request.
 The states are a first draft. They will be narrowed down to a minimum, when the development goes on.
 
