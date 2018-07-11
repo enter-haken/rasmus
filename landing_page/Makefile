@@ -15,9 +15,12 @@ deploy:
 clean:
 	rm dist/ -rf
 
-.PHONY: deep_clean
-deep_clean:
+.PHONY: clean_node_modules 
+clean_node_modules:
 	rm node_modules/ -rf
+
+.PHONY: deep_clean
+deep_clean: clean clean_node_modules
 
 .PHONY: all
 all: clean build deploy
