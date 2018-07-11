@@ -34,7 +34,8 @@ For the `frontend`
 * yarn >= 1.6.0
 
 For the `landing page`  
-* npm >= 6.0.1
+
+* yarn >= 1.6.0
 * gulp >= 3.9.1
 
 ### compile
