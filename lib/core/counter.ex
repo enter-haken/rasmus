@@ -16,11 +16,11 @@ defmodule Core.Counter do
   end
 
   @doc """
-  Starts postgres listener for the `core` channel
+  Starts postgres listener for the `rasmus` channel
   """
   def init(pg_config) do
     {:ok, pid} = Postgrex.Notifications.start_link(pg_config)
-    {:ok, ref} = Postgrex.Notifications.listen(pid, "core")
+    {:ok, ref} = Postgrex.Notifications.listen(pid, "rasmus")
     
     Logger.info("#{__MODULE__} started.")
     Logger.info("listening to changes for pid #{inspect(pid)}")
@@ -31,7 +31,7 @@ defmodule Core.Counter do
   @doc """
   After a request is inserted into `transfer`, the `Core.Manager.perform/1` is started.
   """
-  def handle_info({:notification, pid, ref, "core", payload},_) do
+  def handle_info({:notification, pid, ref, "rasmus", payload},_) do
     case Jason.decode(payload) do
      {:ok , %{ "id" => id, "state" => "pending", }} -> Core.Manager.perform(id)
        

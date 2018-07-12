@@ -1,4 +1,4 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 --todo: seed admin account? during install?
 --json view -> user + roles + privileges
@@ -29,9 +29,9 @@ CREATE FUNCTION set_user_dirty_for_role(role_id UUID) RETURNS VOID AS $$
 DECLARE
     current_user_id UUID;
 BEGIN
-    FOR current_user_id IN SELECT id_user FROM core.user_in_role WHERE id_role = role_id
+    FOR current_user_id IN SELECT id_user FROM rasmus.user_in_role WHERE id_role = role_id
     LOOP
-        PERFORM core.set_user_dirty(current_user_id);
+        PERFORM rasmus.set_user_dirty(current_user_id);
         RAISE NOTICE 'user % is set to dirty, because role % has been deleted or changed', current_user_id, role_id;
     END LOOP;
 END
@@ -39,7 +39,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION role_changed_trigger() RETURNS TRIGGER AS $$
 BEGIN
-    PERFORM core.set_user_dirty_for_role(NEW.id);
+    PERFORM rasmus.set_user_dirty_for_role(NEW.id);
     
     -- todo: generic check for other entity values changes
     IF OLD.json_view IS NULL OR NEW.json_view <> OLD.json_view THEN
@@ -55,7 +55,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION role_deleted_trigger() RETURNS TRIGGER AS $$
 BEGIN
-    PERFORM core.set_user_dirty_for_role(OLD.id);
+    PERFORM rasmus.set_user_dirty_for_role(OLD.id);
     RETURN OLD;
 END
 $$ LANGUAGE plpgsql;
@@ -114,11 +114,11 @@ DECLARE
     user_roles JSONB;
     role_id UUID;
 BEGIN
-    IF EXISTS (SELECT 1 FROM core."user" WHERE 
+    IF EXISTS (SELECT 1 FROM rasmus."user" WHERE 
             json_view IS NOT NULL AND 
             (json_view->>'is_dirty')::BOOLEAN = false AND 
             id = user_id) THEN
-        SELECT json_view FROM core."user" WHERE id = user_id INTO user_raw;
+        SELECT json_view FROM rasmus."user" WHERE id = user_id INTO user_raw;
         RAISE NOTICE 'returning undirty user %', user_id;
         RETURN user_raw;
     END IF;
@@ -134,7 +134,7 @@ BEGIN
 
     user_roles := '[]'::JSONB;
 
-    FOR role_id IN SELECT id_role FROM core.user_in_role uir WHERE uir.id_user = user_id
+    FOR role_id IN SELECT id_role FROM rasmus.user_in_role uir WHERE uir.id_user = user_id
     LOOP
         RAISE NOTICE 'get_role_view during get user json_view';
         user_roles := user_roles || get_role_view(role_id);
@@ -157,9 +157,9 @@ CREATE FUNCTION update_dirty_user() RETURNS VOID AS $$
 DECLARE 
     user_id UUID;
 BEGIN
-    FOR user_id IN SELECT id FROM core."user" WHERE (json_view->>'is_dirty')::boolean = true
+    FOR user_id IN SELECT id FROM rasmus."user" WHERE (json_view->>'is_dirty')::boolean = true
     LOOP
-        PERFORM core.get_user_view(user_id);
+        PERFORM rasmus.get_user_view(user_id);
     END LOOP;
 END
 $$ LANGUAGE plpgsql;

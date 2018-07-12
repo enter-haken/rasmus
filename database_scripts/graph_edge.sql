@@ -1,4 +1,4 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 -- todo: there must be exactly two foreign keys set for a valid edge
 

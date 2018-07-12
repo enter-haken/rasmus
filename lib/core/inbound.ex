@@ -27,7 +27,7 @@ defmodule Core.Inbound do
   adds a new entity into the database 
   """
   def handle_cast({:add, payload}, state) do
-    case Postgrex.query(state, "INSERT INTO core.transfer (request) VALUES ($1)", [payload]) do
+    case Postgrex.query(state, "INSERT INTO rasmus.transfer (request) VALUES ($1)", [payload]) do
       {:ok, result} -> Logger.debug("added into transfer: #{inspect(result)}")
       {:error, error} -> Logger.error("adding into transfer failed: #{inspect(error)}. Tried to add #{inspect(payload)}")
     end
@@ -39,7 +39,7 @@ defmodule Core.Inbound do
   This will be removed
   """
   def handle_cast({:get}, state) do
-    {:ok, result} = Postgrex.query(state, "SELECT * FROM core.transfer LIMIT 1",[])
+    {:ok, result} = Postgrex.query(state, "SELECT * FROM rasmus.transfer LIMIT 1",[])
 
     Logger.debug("select one row from transfer: #{inspect(result)}")
     {:noreply, state}
@@ -61,11 +61,10 @@ defmodule Core.Inbound do
     # first insert tests
     add(%{
       "entity" => "privilege", 
-      "payload" => %{
+      "data" => %{
         "description" => "show dashboard", 
         "name" => "dasboard", 
         "role_level" => "guest"}, 
-      "schema" => "core", 
       "action" => "add"})
   end
 

@@ -1,4 +1,4 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 -- there will be link types wich can have different behaviour / visualisations
 -- eg. a link to a github / gitlab project

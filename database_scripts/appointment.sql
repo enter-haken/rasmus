@@ -1,4 +1,4 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 CREATE TABLE appointment(
   id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),

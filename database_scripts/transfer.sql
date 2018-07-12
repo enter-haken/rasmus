@@ -1,11 +1,10 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 -- this is the entry point to the database
 
 -- request:
 -- {
 --     "action": "add",
---     "schema": "core",
 --     "entity": "privilege",
 --     "data": {
 --         "name": "dasboard",
@@ -16,7 +15,7 @@ SET search_path TO core,public;
 
 -- action: 
 -- * 'pending' -> initial value
--- * 'processing', -> the coresponding manager does it's work
+-- * 'processing', -> the rasmus.ponding manager does it's work
 -- * 'succeeded',
 -- * 'succeeded_with_warning',
 -- * 'error'
@@ -26,9 +25,6 @@ SET search_path TO core,public;
 -- * `privilege`
 -- * `user`
 -- * `link`
-
--- schema:
--- * `core` -> the current schema for the operation
 
 -- data:
 -- * json object -> single result
@@ -46,7 +42,7 @@ CREATE TABLE transfer(
 CREATE FUNCTION send_transfer_message() RETURNS TRIGGER AS $$
 BEGIN 
     --todo: declare, when a message should be send to the backend?
-    PERFORM core.send_message(NEW.id, NEW.state, NEW.request, NEW.response);
+    PERFORM rasmus.send_message(NEW.id, NEW.state, NEW.request, NEW.response);
     RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -70,18 +66,18 @@ DECLARE
     transfer_record RECORD;
     transfer_response JSONB;
 BEGIN
-   SELECT id, state, request, response FROM core.transfer WHERE id = transfer_id::UUID INTO transfer_record;
+   SELECT id, state, request, response FROM rasmus.transfer WHERE id = transfer_id::UUID INTO transfer_record;
 
    CASE transfer_record.request->>'entity'
        WHEN 'role' THEN 
            BEGIN
-                SELECT core.role_manager(transfer_record.request) INTO transfer_response;
-                PERFORM core.set_response(transfer_id::UUID, transfer_response);
+                SELECT rasmus.role_manager(transfer_record.request) INTO transfer_response;
+                PERFORM rasmus.set_response(transfer_id::UUID, transfer_response);
            END;
        WHEN 'privilege' THEN 
            BEGIN
-               SELECT core.privilege_manager(transfer_record.request) INTO transfer_response;
-               PERFORM core.set_response(transfer_id::UUID, transfer_response);
+               SELECT rasmus.privilege_manager(transfer_record.request) INTO transfer_response;
+               PERFORM rasmus.set_response(transfer_id::UUID, transfer_response);
            END;
        WHEN 'user' THEN 
            BEGIN 
@@ -98,44 +94,44 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_response(transfer_id UUID, transfer_response JSONB) RETURNS VOID AS $$
 BEGIN
-    UPDATE core.transfer SET response = transfer_response WHERE id = transfer_id;
+    UPDATE rasmus.transfer SET response = transfer_response WHERE id = transfer_id;
 END
 $$ LANGUAGE plpgsql;
 
 -- update transfer states
 CREATE FUNCTION set_state(transfer_id UUID, new_state transfer_state) RETURNS VOID AS $$
 BEGIN
-    UPDATE core.transfer set state = new_state WHERE id = transfer_id;
+    UPDATE rasmus.transfer set state = new_state WHERE id = transfer_id;
 END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_pending(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
-    PERFORM core.set_state(transfer_id::UUID, 'pending');
+    PERFORM rasmus.set_state(transfer_id::UUID, 'pending');
 END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_processing(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
  
-    PERFORM core.set_state(transfer_id::UUID, 'processing'); 
+    PERFORM rasmus.set_state(transfer_id::UUID, 'processing'); 
 END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_succeeded(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
-    PERFORM core.set_state(transfer_id::UUID, 'succeeded'); 
+    PERFORM rasmus.set_state(transfer_id::UUID, 'succeeded'); 
 END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_succeeded_with_warning(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
-    PERFORM core.set_state(transfer_id::UUID, 'succeeded_with_warning'); 
+    PERFORM rasmus.set_state(transfer_id::UUID, 'succeeded_with_warning'); 
 END
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION set_error(transfer_id TEXT) RETURNS VOID AS $$
 BEGIN
-    PERFORM core.set_state(transfer_id::UUID, 'error'); 
+    PERFORM rasmus.set_state(transfer_id::UUID, 'error'); 
 END
 $$ LANGUAGE plpgsql;

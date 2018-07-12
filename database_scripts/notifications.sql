@@ -1,8 +1,8 @@
-SET search_path TO core,public;
+SET search_path TO rasmus,public;
 
 -- send a message to the backend, if a record is set to dirty
 -- the raw_entity_record must contain a json_view
-CREATE FUNCTION send_dirty_message(id UUID, schema TEXT, entity TEXT) RETURNS VOID AS $$
+CREATE FUNCTION send_dirty_message(id UUID, entity TEXT) RETURNS VOID AS $$
 DECLARE 
     message_response JSONB;
 BEGIN
@@ -13,7 +13,7 @@ BEGIN
         jsonb_build_object('entity', entity)
     );
 
-    PERFORM pg_notify(schema, message_response->>0);
+    PERFORM pg_notify('rasmus', message_response->>0);
 END
 $$ LANGUAGE plpgsql;
 
@@ -30,6 +30,6 @@ BEGIN
         jsonb_build_object('entity', request->>'entity')
     );
 
-    PERFORM pg_notify(request->>'schema', message_response->>0);
+    PERFORM pg_notify('rasmus', message_response->>0);
 END
 $$ LANGUAGE plpgsql;

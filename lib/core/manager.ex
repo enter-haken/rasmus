@@ -24,7 +24,7 @@ defmodule Core.Manager do
   def handle_cast(transfer_id, state) do
     Logger.info("perform transfer_manager for transfer id: #{transfer_id}")
 
-    case Postgrex.query(state, "SELECT core.transfer_manager($1)", [transfer_id]) do
+    case Postgrex.query(state, "SELECT rasmus.transfer_manager($1)", [transfer_id]) do
       #{:ok, result} -> Logger.debug("manager performed: #{inspect(result, pretty: true)}")
       {:ok, %{messages: messages}} -> 
         if Enum.any?(messages, fn(x) -> x.severity == "WARNING" end) do
@@ -80,7 +80,7 @@ defmodule Core.Manager do
 
   defp set_state(state, transfer_id, sql_function_name, state_name) do
     
-    case Postgrex.query(state, "SELECT core.#{sql_function_name}($1)", [transfer_id]) do
+    case Postgrex.query(state, "SELECT rasmus.#{sql_function_name}($1)", [transfer_id]) do
       {:ok, _} -> Logger.debug("set state '#{state_name}' for #{transfer_id} succeeded")
       _ -> Logger.error("set state '#{state_name}' for #{transfer_id} failed")
     end
