@@ -28,29 +28,32 @@ defmodule Web.Router do
 
   plug :dispatch
 
+  # default route
   get "/" do
     conn
     |> send_file(200, "priv/static/index.html")
   end
 
-  # a simple test:
-  #
-  # $ curl -H "Content-Type: application/json" -d '{ "name" : "steve" }' http://127.0.0.1:8080/api
-  # {"response":"ok"}
-  #
-  # $ curl -H "Content-Type: application/json" -d '{ "name2" : "steve" }' http://127.0.0.1:8080/api
-  # {"response":"error"}
-
   post "/api" do
     Logger.info("#{inspect(conn, pretty: true)}")
 
-    { status, body } =
-      case conn.body_params do
-        %{ "name" => name } -> response_ok
-        _ -> response_error
-      end
-    conn 
-    |> send_resp(status, body)
+    with {:ok, action} <- get_action_from(conn.body_params),
+         {:ok, entity}  <- get_entity_from(conn.body_params),
+         {:ok, data } <- get_data_from(conn.body_params) 
+    do
+      Logger.info("Got #{action} for #{entity} with #{inspect(data)}") 
+
+      Core.Inbound.add(conn.body_params)
+
+      conn
+      |> send_resp(200, get_succeeded_response())
+    else
+      {:error, message} -> 
+        Logger.info("Got failed request: #{message}") 
+
+        conn
+        |> send_resp(422, get_error_response(message))
+    end
   end
 
   match _ do
@@ -58,8 +61,30 @@ defmodule Web.Router do
     |> send_resp(404, "not found")
   end
 
-  defp response_ok, do: { 200, Jason.encode!(%{ response: "ok"})}
-  defp response_error, do: { 422, Jason.encode!(%{ response: "error"})}
+  defp get_succeeded_response, do: Jason.encode!(%{ response: "ok"})
+  defp get_error_response(error), do: Jason.encode!(%{ response: error})
 
+  defp get_action_from(%{ "action" =>  action } = _body_params) do
+    case Enum.member?(["add","update","get","delete"], action) do
+      true -> {:ok, action }
+      _ -> { :error, "#{action} is not valid" }
+    end
+  end
+
+  defp get_action_from(_body_params), do: { :error, "action is missing" }
+
+  defp get_entity_from(%{ "entity" => entity } = _body_params) do
+    case Enum.member?(["user","privilege","role","link","appointment","list"], entity) do
+      true -> {:ok, entity }
+      _ -> { :error, "#{entity} is not valid" }
+    end
+  end
+
+  defp get_entity_from(_body_params), do: { :error, "entity is missing" }
+
+  # todo: add additional validations for data field, like "id" and so on.
+  defp get_data_from(%{"data" => data} = _body_params) when data != %{}, do: {:ok, data }
+  defp get_data_from(%{"data" => data} = _body_params) when data == %{}, do: {:error, "data field must not be empty" }
+  defp get_data_from(_body_params), do: {:error, "data field is missing" }
+  
 end
-
