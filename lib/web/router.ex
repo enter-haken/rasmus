@@ -35,8 +35,6 @@ defmodule Web.Router do
   end
 
   post "/api" do
-    Logger.info("#{inspect(conn, pretty: true)}")
-
     with {:ok, action} <- get_action_from(conn.body_params),
          {:ok, entity}  <- get_entity_from(conn.body_params),
          {:ok, data } <- get_data_from(conn.body_params) 
@@ -49,7 +47,7 @@ defmodule Web.Router do
       |> send_resp(200, get_succeeded_response())
     else
       {:error, message} -> 
-        Logger.info("Got failed request: #{message}") 
+        Logger.warn("Got malformed request: #{message}") 
 
         conn
         |> send_resp(422, get_error_response(message))

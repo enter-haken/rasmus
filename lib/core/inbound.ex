@@ -55,19 +55,6 @@ defmodule Core.Inbound do
     GenServer.cast(:inbound_worker, {:add, entity})
   end
 
-  def add() do
-    # force db error
-    # add(%{"test" => 1})
-    # first insert tests
-    add(%{
-      "entity" => "privilege", 
-      "data" => %{
-        "description" => "show dashboard", 
-        "name" => "dasboard", 
-        "role_level" => "guest"}, 
-      "action" => "add"})
-  end
-
   def get() do
     GenServer.cast(:inbound_worker, {:get})
   end

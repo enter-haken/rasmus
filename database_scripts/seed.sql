@@ -1,23 +1,18 @@
 SET search_path TO rasmus,public;
 
--- these are some  test inserts to transfer
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB),
-    ('{"action" : "add", "entity":"privilege", "data": {"name":"news", "description": "show news feed", "minimum_read_role_level":"user"}}'::JSONB),
-    ('{"action" : "add", "entity":"role", "data": {"name":"admin", "description": "the admin can do everything within the instance"}}'::JSONB),
-    ('{"action" : "add", "entity":"role", "data": {"name":"user", "description": "this is the standard user role"}}'::JSONB),
-    ('{"action" : "add", "entity":"role", "data": {"name":"guest", "description": "this role is used, when a user is not logged in"}}'::JSONB),
-    ('{"action" : "add", "entity":"user", "data" : {"first_name":"Jan Frederik", "last_name": "Hake", "email_address": "jan_hake@gmx.de", "login": "jan_hake"}}'::JSONB);
+--
+--
+--
+-- DO NOT USE IN PRODUCTION
+--
+--
+--
+--
 
-INSERT INTO privilege (name, description) VALUES ('user_management', 'work with systemwide user management'),
-    ('role_management', 'work with systemwide role management'),
-    ('privilege_management', 'work with systemwide privilege management');
+--
+-- these tasks should be done by the entity managers
+-- 
 
-INSERT INTO role (name, description, role_level) VALUES 
-    ('admin', 'the admin can do everything within the instance','admin');
-
--- add all privileges to admin role with read and write permissions
--- this is a test insert
--- it will be removed in future
 DO $$
 DECLARE
     admin_role_id UUID;
@@ -50,10 +45,6 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-INSERT INTO transfer (request) VALUES ('{"action" : "add", "entity":"privilege", "data": {"name":"dashboard", "description": "show dashboard", "minimum_read_role_level":"user"}}'::JSONB);
-INSERT INTO transfer (request) VALUES ('{"action":"get" , "entity":"privilege"}'::JSONB);
-INSERT INTO transfer (request) VALUES ('{"action":"get" , "entity":"privilege", "data": { "name" : "dash"}}'::JSONB);
-
 DO $$
 DECLARE
     privilege_id UUID;
@@ -76,9 +67,6 @@ BEGIN
         VALUES (format('{"action" : "update", "entity":"privilege", "data": {"id" : "%1$s", "description" : "user management_desc"}}', privilege_id)::JSONB);
 END
 $$ LANGUAGE plpgsql;
-
-INSERT INTO transfer (request) 
-        VALUES ('{"action" : "get", "entity":"role"}'::JSONB);
 
 DO $$
 DECLARE
