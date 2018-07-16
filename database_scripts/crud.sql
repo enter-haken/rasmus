@@ -1,7 +1,7 @@
 SET search_path TO rasmus,public;
 
 -- 
--- gets the table colums for a given schema and entity
+-- gets the table columns for a given schema and entity
 --
 -- udt_schema for build in types is "pg_catalog"
 -- custom types will be "rasmus" at the moment
@@ -74,9 +74,11 @@ CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN D
         if not current_column:
             return ""
 
+        # -- hyphened text
         if current_column["udt_name"] in ["varchar","text"]:
             return "{} LIKE '%{}%'".format(col,value)
             
+        # -- hyphened enums
         if current_column["udt_schema"] == "rasmus":
             return "{} = '{}'::rasmus.{}".format(col,value, current_column["udt_name"])
 
@@ -90,12 +92,12 @@ CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN D
 
     sql = "SELECT "
     if only_json_view:
-        # it is possible that the json view is null or dirty
+        # -- it is possible that the json view is null or dirty
         sql += "id, json_view"
     else:
         sql += ", ".join([x["column_name"] for x in metadata])
 
-    sql += " FROM {}.{}".format(request["schema"], request["entity"])
+    sql += " FROM rasmus.{}".format(request["entity"])
 
     if "data" in request:
         sql += " WHERE "
@@ -153,7 +155,7 @@ CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
     sql += ", ".join(x for x in request["data"].keys() if x != "id")
     sql += ") VALUES ("
     sql += ", ".join([x for x in [create_value_statement(k,v,metadata) for k,v in request["data"].items() if k != "id"] if x])
-    sql += ") RETURNING id"
+    sql += ") RETURNING id;"
 
     plpy.notice(sql)
 
