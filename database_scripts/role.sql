@@ -141,14 +141,11 @@ CREATE FUNCTION update_privileges_for_role_if_necessary(raw_request JSONB) RETUR
     if not "data" in request or not "privileges" in request['data']:
         return json.dumps([])
 
-    # -- get current privileges
+    # -- get current privileges from "role_privilege"
     # -- diff current privileges with requested ones
     # -- delete privilege relations for current privileges, which are not in requested
     # -- add privilege relations for requested privileges, which ar not in current privileges
-    # -- update known privileges if necessary
-
-    # -- TODO: use crud functions
-
+    # -- don't change the privileges it self.
 
     current_role_privileges = plpy.execute(plpy.prepare("SELECT id_role, id_privilege, can_read, can_write FROM role_privilege WHERE id = $  "))
     
