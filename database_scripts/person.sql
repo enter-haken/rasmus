@@ -1,5 +1,29 @@
 SET search_path TO rasmus,public;
 
+-- todo: json_view
+
+-- {
+--   "id_user" : "xxx",
+--   "first_name" : "Jan",
+--   "last_name" : "Hake",
+--   "url" : "https://enter-haken.github.io",
+--   "notes" : "cool guy",
+--   "phones" : [{
+--     "number" : "0123456",
+--     "is_primary" : true
+--   }],
+--   "emails": [{ 
+--     "email" : "jan_hake@gmx.de",
+--     "is_primary" : true
+--   }],
+--   "addresses" : [{
+--     "street" : "Fakestreet",
+--     "housenumber" : "123",
+--     "zip" : "12345",
+--     "city" : "Springfield"
+--   }]
+-- }
+
 CREATE TABLE person(
   id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
   id_user UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
