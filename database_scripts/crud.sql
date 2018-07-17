@@ -71,6 +71,8 @@ CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN D
     def create_where_statement(col, value, metadata):
         current_column = next(x for x in metadata if x["column_name"] == col)
 
+        # -- todo: array eg. WHERE x IN ['bla','blub']
+
         if not current_column:
             return ""
 
@@ -97,7 +99,7 @@ CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN D
     else:
         sql += ", ".join([x["column_name"] for x in metadata])
 
-    sql += " FROM rasmus.{}".format(request["entity"])
+    sql += ' FROM rasmus.{}'.format(request["entity"])
 
     if "data" in request:
         sql += " WHERE "
@@ -133,7 +135,7 @@ CREATE FUNCTION get_insert_statement(raw_request JSONB) RETURNS TEXT AS $$
         if not current_column:
             return ""
 
-        if current_column["udt_name"] in ["varchar","text"]:
+        if current_column["udt_name"] in ["varchar","text","uuid"]:
             return "'{}'".format(value)
             
         if current_column["udt_schema"] == "rasmus":
