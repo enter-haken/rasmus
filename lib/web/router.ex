@@ -87,6 +87,7 @@ defmodule Web.Router do
   # todo: add additional validations for data field, like "id" and so on.
   defp get_data_from(%{"data" => data} = _body_params) when data != %{}, do: {:ok, data }
   defp get_data_from(%{"data" => data} = _body_params) when data == %{}, do: {:error, "data field must not be empty" }
+  defp get_data_from(%{"action" => action} = _body_params) when action == "get", do: {:ok, "fine" }
   defp get_data_from(_body_params), do: {:error, "data field is missing" }
 
   defp get_quoted(strings) do
