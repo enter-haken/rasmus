@@ -17,7 +17,9 @@ SET search_path TO rasmus,public;
 --       "description" : "a",
 --       "weight" : 1
 --     },
---     "nodes" : [{
+--     "depth" : 1
+--   },
+--   "nodes" : [{
 --       "id" : "blub",
 --       "name" : "a",
 --       "description" : "a",
@@ -32,9 +34,8 @@ SET search_path TO rasmus,public;
 --       "name" : "c",
 --       "description" : "c",
 --       "weight" : 1
---     }
---     ] 
---   }
+--     }] 
+--   },
 --   "dot" : "graph { a - b; b - c; a -c; }"
 -- }
 
@@ -62,4 +63,51 @@ CREATE TABLE "link"(
     url VARCHAR(2048),
     json_view JSONB
 );
+
+--
+-- manager functions
+--
+
+CREATE FUNCTION link_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE 
+    link_response JSONB;
+    manager_result JSONB;
+BEGIN
+    CASE request->>'action'
+        -- WHEN 'get' THEN SELECT rasmus.link_get_manager(request) INTO manager_result;
+        WHEN 'add' THEN SELECT rasmus.link_add_manager(request) INTO manager_result;
+        -- WHEN 'delete' THEN SELECT rasmus.link_delete_manager(request) INTO manager_result;
+        -- WHEN 'update' THEN SELECT rasmus.link_update_manager(request) INTO manager_result; 
+        ELSE RAISE EXCEPTION 'unknown action `%`. aborting link manger', request->>'action';
+    END CASE;
+
+    link_response :=  rasmus.get_entity(request->>'entity')
+        || jsonb_build_object('data', manager_result);
+
+    RETURN link_response; 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION link_add_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE 
+    response JSONB;
+    link_id UUID;
+    sql TEXT;
+BEGIN
+    SELECT rasmus.get_insert_statement(request) INTO sql;
+
+    EXECUTE sql INTO link_id;
+
+    SELECT row_to_json(p) FROM (SELECT 
+        id,
+        name,
+        description,
+        url
+        FROM rasmus."link"
+        WHERE id = link_id) p INTO response;
+
+    RETURN response;
+END
+$$ LANGUAGE plpgsql;
+
 

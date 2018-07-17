@@ -81,12 +81,30 @@ BEGIN
            END;
        WHEN 'user' THEN 
            BEGIN 
-               RAISE EXCEPTION 'user manager missing';
-           END;
+               SELECT rasmus.user_manager(transfer_record.request) INTO transfer_response;
+               PERFORM rasmus.set_response(transfer_id::UUID, transfer_response);
+           END; 
+       WHEN 'link' THEN 
+           BEGIN 
+               SELECT rasmus.link_manager(transfer_record.request) INTO transfer_response;
+               PERFORM rasmus.set_response(transfer_id::UUID, transfer_response);
+           END; 
+       WHEN 'appointment' THEN 
+           BEGIN 
+               RAISE EXCEPTION 'appointment manager missing';
+           END; 
+       WHEN 'list' THEN 
+           BEGIN 
+               RAISE EXCEPTION 'list manager missing';
+           END; 
+       WHEN 'person' THEN 
+           BEGIN 
+               RAISE EXCEPTION 'person manager missing';
+           END; 
        ELSE 
            BEGIN
                RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
-                   USING HINT = 'entity must one of role, privilege or user';
+                   USING HINT = 'entity must one of link, appointment, list, person, role, privilege or user';
            END;
    END CASE;
 END
