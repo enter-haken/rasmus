@@ -26,7 +26,7 @@ SET search_path TO rasmus,public;
 
 CREATE TABLE person(
   id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-  id_user UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  id_owner UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   first_name VARCHAR(512), 
   last_name VARCHAR(512),
   url VARCHAR(2048),

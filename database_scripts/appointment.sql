@@ -2,7 +2,7 @@ SET search_path TO rasmus,public;
 
 CREATE TABLE appointment(
   id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-  id_user UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  id_owner UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   id_address UUID NOT NULL REFERENCES address(id) ON DELETE CASCADE, 
   -- todo: past events
   -- should the appointment be deleted, if the address does not exists any more? 

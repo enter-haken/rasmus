@@ -57,7 +57,7 @@ SET search_path TO rasmus,public;
 
 CREATE TABLE "link"(
     id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    id_user UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    id_owner UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
     name VARCHAR(80) UNIQUE NOT NULL,
     description VARCHAR(254),
     url VARCHAR(2048),
