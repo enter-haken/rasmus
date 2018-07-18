@@ -143,6 +143,7 @@ CREATE FUNCTION update_privileges_for_role_if_necessary(raw_request JSONB) RETUR
 
     # -- get current privileges from "role_privilege"
     # -- diff current privileges with requested ones
+    # -- only use id to find duplicates
     # -- delete privilege relations for current privileges, which are not in requested
     # -- add privilege relations for requested privileges, which ar not in current privileges
     # -- don't change the privileges it self.

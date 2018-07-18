@@ -25,6 +25,7 @@ curl -H "Content-Type: application/json" -d '{"action":"get","entity":"role"}' h
 sleep 2
 
 userid=`psql -U postgres -d rasmus -c "select id from rasmus.user" | sed -e '1,2d' -e '4,5d' -e 's/^ //'`
+admin_role_id=`psql -U postgres -d rasmus -c "select id from rasmus.role where name = 'admin'" | sed -e '1,2d' -e '4,5d' -e 's/^ //'`
 
 curl -H "Content-Type: application/json" -d '{"action":"update","entity":"user", "data" : { "id" : "'"$userid"'", "first_name" : "Jan"}}' http://localhost:8080/api
 

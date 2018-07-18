@@ -76,11 +76,15 @@ CREATE FUNCTION get_select_statement(raw_request JSONB, only_json_view BOOLEAN D
         if not current_column:
             return ""
 
-        # -- hyphened text
+        # -- quoted text
         if current_column["udt_name"] in ["varchar","text"]:
             return "{} LIKE '%{}%'".format(col,value)
+ 
+        # -- quoted uuid 
+        if current_column["udt_name"] in ["uuid"]:
+            return "{} = '{}'".format(col,value)
             
-        # -- hyphened enums
+        # -- quoted enums:
         if current_column["udt_schema"] == "rasmus":
             return "{} = '{}'::rasmus.{}".format(col,value, current_column["udt_name"])
 
