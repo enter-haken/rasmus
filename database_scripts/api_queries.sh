@@ -31,4 +31,5 @@ curl -H "Content-Type: application/json" -d '{"action":"update","entity":"user",
 
 curl -H "Content-Type: application/json" -d '{"action":"get","entity":"user"}' http://localhost:8080/api
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_user":"'"$userid"'", "name": "Google", "description" : "Search engine", "url" : "https://www.google.com" }}' http://localhost:8080/api
+curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$userid"'", "name": "Google", "description" : "Search engine", "url" : "https://www.google.com" }}' http://localhost:8080/api
+
