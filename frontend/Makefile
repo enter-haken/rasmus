@@ -11,6 +11,7 @@ build:
 
 .PHONY: deploy
 deploy:
+	if [ ! -d $(TARGET) ]; then mkdir -p $(TARGET); fi
 	rm ../priv/static/* -rf
 	if [ ! -d build ]; then make; fi
 	cp ./build/index.html $(TARGET)	
@@ -30,10 +31,6 @@ clean_node_modules:
 
 .PHONY: deep_clean
 deep_clean: clean clean_node_modules
-
-.PHONY: run
-run: 
-	$(PACKAGE_MANAGER) run start
 
 .PHONY: all
 all: clean build deploy
