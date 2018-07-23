@@ -43,9 +43,6 @@ function App(props) {
         </AppBar>
       </div>
       <div>
-          <Typography>
-          This is just a sample, how the UI can look like. The graph shows the current status of the rasmus database.
-        </Typography>
         <Graph />
       </div>
     </div>

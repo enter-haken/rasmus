@@ -1,6 +1,6 @@
 # rasmus frontend
 
-The `rasmus` frontend uses [react][react] and [material ui][material]. 
+The `rasmus` frontend uses [react][react], [visjs][visjs] and [material ui][material]. 
 
 # build
 
@@ -23,11 +23,11 @@ Currently it is also possible to run the application localy without the backend.
 
 For details, take a look at the `Makefile`.
 
-
 # contact
 
 Jan Frederik Hake, <jan_hake@gmx.de>. [@enter_haken](https://twitter.com/enter_haken) on Twitter.
 
 [react]: https://reactjs.org/
 [material]: https://material-ui.com/
+[visjs]: http://visjs.org/
 

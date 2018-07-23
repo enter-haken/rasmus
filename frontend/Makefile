@@ -31,6 +31,10 @@ clean_node_modules:
 .PHONY: deep_clean
 deep_clean: clean clean_node_modules
 
+.PHONY: run
+run: 
+	$(PACKAGE_MANAGER) run start
+
 .PHONY: all
 all: clean build deploy
 
