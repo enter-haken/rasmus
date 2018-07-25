@@ -1,5 +1,9 @@
 SET search_path TO rasmus,public;
 
+-- this script creates the tables for adjacency lists 
+-- every entity with a "json_view" column except "role" and "user"
+-- can be used for the rasmus graph
+
 DO $$
   # -- entities = ['link', 'person', 'appointment', 'list']
 
@@ -16,6 +20,7 @@ DO $$
             id_first_{row} UUID NOT NULL REFERENCES {row}(id) ON DELETE CASCADE, 
             id_second_{row} UUID NOT NULL REFERENCES {row}(id) ON DELETE CASCADE, 
             weight INTEGER NOT NULL default 1,
+            label VARCHAR(128),
             PRIMARY KEY(id_first_{row},id_second_{row})
           );
         """.format(row=row)
@@ -26,9 +31,12 @@ DO $$
             id_{row} UUID NOT NULL REFERENCES {row}(id) ON DELETE CASCADE, 
             id_{column} UUID NOT NULL REFERENCES {column}(id) ON DELETE CASCADE, 
             weight INTEGER NOT NULL default 1,
+            label VARCHAR(128),
             PRIMARY KEY(id_{row},id_{column})
           );
         """.format(row=row,column=column)
         plpy.execute(sql)
 
 $$ LANGUAGE plpython3u;
+
+-- graph manager functions
