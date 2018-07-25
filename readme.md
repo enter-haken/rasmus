@@ -6,6 +6,8 @@ This is a *pre alpha* version.
 
 ![][rasmusFrontend]
 
+You can take a view on a [static UI preview][staticUI].
+
 ## motivation
 
 As I worked on an [alternative content management system approach](http://enter-haken.github.io/posts/2018-02-19-rasmus.html),
@@ -77,3 +79,4 @@ This will put a `core_schema.png` file into the projects root folder.
 Jan Frederik Hake, <jan_hake@gmx.de>. [@enter_haken](https://twitter.com/enter_haken) on Twitter.
 
 [rasmusFrontend]: readme_images/rasmus_frontend.png
+[staticUI]: https://enter-haken.github.io/example/rasmus/alpha/index.html
