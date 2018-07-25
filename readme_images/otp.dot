@@ -1,0 +1,24 @@
+digraph {
+   node [ fontname="helvetica",style="filled,rounded",color=white,shape=box];
+   edge [fontname="helvetica", fontsize=10 ];
+
+   rasmus_app -> counter [label = < supervises > ];
+   rasmus_app -> inbound [label = < supervises > ];
+   rasmus_app -> manager [label = < supervises > ];
+   rasmus_app -> cowboy [label = < supervises > ];  
+   cowboy -> router; 
+
+   inbound -> postgres [label = < insert into<br />transfer table > ];
+   counter -> postgres [label = < listens >];
+   counter -> manager [label = < execute > ];
+
+
+   rasmus_app [label = < <b>rasmus_app</b><br/>application behaviour >];
+   counter [label = < <b>counter</b><br/>Postgres notification<br/>listener >];
+   inbound [label = < <b>inbound</b><br/>add entities into the<br/>transfer table > ];
+   manager [label = < <b>manager</b><br/>executes a<br/>database manager >];
+   
+   cowboy [label = < <b>cowboy</b><br/>erlang webserver >];
+   router [label = < <b>router</b><br/>managing<br/>http routes >];
+   postgres [label = < <b>PostgreSQL</b><br/>database server >];
+}
