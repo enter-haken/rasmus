@@ -47,13 +47,7 @@ class Graph extends React.Component {
   componentDidMount() {
     let parsedData = vis.network.convertDot(dot);
     let data = {
-      nodes: parsedData.nodes.map(node => {
-        if (node.id == "info") {
-          node.x = 0;
-          node.y = 0;
-        }
-       return node;
-      }),
+      nodes: parsedData.nodes,
       edges: parsedData.edges
     }  
     console.log(data);

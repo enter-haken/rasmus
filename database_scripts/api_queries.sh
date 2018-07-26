@@ -57,3 +57,6 @@ curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link",
 curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "postcreate", "description" : "table manipulation\nafter DDL", "url" : "https://github.com/enter-haken/rasmus/blob/master/database_scripts/postcreate.sql" }}' $API_URL
 
 curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "crud", "description" : "generic CREATE, READ\nUPDATE, DELETE\nfunctions", "url" : ""https://github.com/enter-haken/rasmus/blob/master/database_scripts/crud.sql" }}' $API_URL
+
+#curl -H "Content-Type: application/json" -d '{"action" : "get", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'"  }}' $API_URL
+curl -H "Content-Type: application/json" -d '{"action" : "get", "entity":"graph", "data" : { "id_owner":"'"$USER_ID"'"  }}' $API_URL

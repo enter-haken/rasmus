@@ -101,10 +101,15 @@ BEGIN
            BEGIN 
                RAISE EXCEPTION 'person manager missing';
            END; 
+       WHEN 'graph' THEN
+           BEGIN
+              SELECT rasmus.get_graph_for(transfer_record.request) INTO transfer_response;
+              PERFORM rasmus.set_response(transfer_id::UUID, transfer_response);
+           END;
        ELSE 
            BEGIN
                RAISE EXCEPTION 'entity `%` unknown', transfer_record.request->>'entity' 
-                   USING HINT = 'entity must one of link, appointment, list, person, role, privilege or user';
+                   USING HINT = 'entity must one of link, graph, appointment, list, person, role, privilege or user';
            END;
    END CASE;
 END

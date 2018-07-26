@@ -74,7 +74,7 @@ DECLARE
     manager_result JSONB;
 BEGIN
     CASE request->>'action'
-        -- WHEN 'get' THEN SELECT rasmus.link_get_manager(request) INTO manager_result;
+        WHEN 'get' THEN SELECT rasmus.link_get_manager(request) INTO manager_result;
         WHEN 'add' THEN SELECT rasmus.link_add_manager(request) INTO manager_result;
         -- WHEN 'delete' THEN SELECT rasmus.link_delete_manager(request) INTO manager_result;
         -- WHEN 'update' THEN SELECT rasmus.link_update_manager(request) INTO manager_result; 
@@ -85,6 +85,39 @@ BEGIN
         || jsonb_build_object('data', manager_result);
 
     RETURN link_response; 
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION link_get_manager(request JSONB) RETURNS JSONB AS $$
+DECLARE
+    response JSONB;
+    sql TEXT;
+    dirty_ids JSONB;
+    dirty_id JSONB;
+BEGIN
+    -- select only json view
+    SELECT rasmus.get_select_statement(request,true) INTO sql;
+
+    sql := 'SELECT array_to_json(array_agg(row_to_json(t))) FROM (' || sql || ') t';
+    
+    EXECUTE sql INTO response;
+
+    SELECT rasmus.get_ids_for_empty_or_dirty_views(response) INTO dirty_ids;
+    
+    IF FOUND THEN
+        RAISE NOTICE 'dirty or empty ids for %: %', request->>'entity',dirty_ids;
+
+        FOR dirty_id in SELECT * FROM jsonb_array_elements(dirty_ids)
+        LOOP
+            PERFORM rasmus.get_link_view((dirty_id->>'id')::UUID);
+        END LOOP;
+        
+        EXECUTE sql INTO response;
+    END IF;
+    
+    SELECT rasmus.flatten_json_view_response(response) INTO response;
+
+    RETURN response;
 END
 $$ LANGUAGE plpgsql;
 
@@ -110,4 +143,31 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION get_link_view(link_id UUID, dirty_read BOOLEAN DEFAULT false) RETURNS JSONB AS $$
+DECLARE
+    link_raw JSONB;
+BEGIN
+    IF dirty_read OR EXISTS (SELECT 1 FROM rasmus."link" WHERE 
+            json_view IS NOT NULL AND 
+            (json_view->>'is_dirty')::BOOLEAN = false AND 
+            id = link_id) THEN
+        SELECT json_view FROM rasmus."link" WHERE id = link_id INTO link_raw;
+        RAISE NOTICE 'returning undirty link %', link_id;
+        RETURN link_raw;
+    END IF;
+
+    -- todo: embed user
+    SELECT row_to_json(link) FROM
+      (SELECT id, id_owner, name, description, url FROM rasmus."link" WHERE id = link_id) "link" INTO link_raw;
+  
+    link_raw := link_raw
+      || rasmus.get_entity('link');
+  
+    UPDATE rasmus."link" SET json_view = link_raw WHERE id = link_id;
+    RAISE NOTICE 'update json_view for link %', link_id;
+  
+    RETURN link_raw;
+
+END
+$$ LANGUAGE plpgsql;
 

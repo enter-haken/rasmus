@@ -3,7 +3,7 @@ defmodule Web.Router do
   require Logger
 
   @actions ["add","update","get","delete"]
-  @entities ["user","privilege","role","link","appointment","list"]
+  @entities ["user","privilege","role","link","appointment","list","graph"]
 
   plug Plug.Logger 
 
