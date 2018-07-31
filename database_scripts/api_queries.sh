@@ -36,27 +36,146 @@ curl -H "Content-Type: application/json" -d '{"action":"get","entity":"user"}' $
 
 # example links / nodes describing rasmus itself
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "otp tree", "description" : "process configuration", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/rasmus_app.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "otp tree",
+      "description": "process configuration",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/rasmus_app.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "router", "description" : "cowboy router", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/web/router.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "router",
+      "description": "cowboy router",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/web/router.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "counter", "description" : "listen to notifications\nfrom database", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/core/counter.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "counter",
+      "description": "listen to notifications\nfrom database",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/core/counter.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "inbound", "description" : "send requests towards\nthe database", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/core/inbound.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "inbound",
+      "description": "send requests towards\nthe database",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/core/inbound.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "manager", "description" : "execute the\ndatabase manager", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/core/manager.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "manager",
+      "description": "execute the\ndatabase manager",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/core/manager.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "client", "description" : "react / visjs app", "url" : "https://github.com/enter-haken/rasmus/blob/master/lib/core/manager.ex" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "client",
+      "description": "react / visjs app",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/lib/core/manager.ex"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "configuration", "description" : "database configuration", "url" : "https://github.com/enter-haken/rasmus/tree/master/config" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "configuration",
+      "description": "database configuration",
+      "url": "https://github.com/enter-haken/rasmus/tree/master/config"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "database", "url" : "https://github.com/enter-haken/rasmus/tree/master/database_scripts" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "database",
+      "url": "https://github.com/enter-haken/rasmus/tree/master/database_scripts"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "transfer", "description" : "interface table", "url" : "https://github.com/enter-haken/rasmus/blob/master/database_scripts/transfer.sql" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "transfer",
+      "description": "interface table",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/database_scripts/transfer.sql"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "postcreate", "description" : "table manipulation\nafter DDL", "url" : "https://github.com/enter-haken/rasmus/blob/master/database_scripts/postcreate.sql" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "postcreate",
+      "description": "table manipulation\nafter DDL",
+      "url": "https://github.com/enter-haken/rasmus/blob/master/database_scripts/postcreate.sql"
+    }
+}
+BODY
 
-curl -H "Content-Type: application/json" -d '{"action" : "add", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'", "name": "crud", "description" : "generic CREATE, READ\nUPDATE, DELETE\nfunctions", "url" : ""https://github.com/enter-haken/rasmus/blob/master/database_scripts/crud.sql" }}' $API_URL
+curl -H "Content-Type: application/json" -X POST $API_URL -d @- <<BODY
+{
+  "action": "add",
+    "entity": "link",
+    "data": {
+      "id_owner": "$USER_ID",
+      "name": "crud",
+      "description": "generic CREATE, READ\nUPDATE, DELETE\nfunctions",
+      "url": "https: //github.com/enter-haken/rasmus/blob/master/database_scripts/crud.sql"
+    }
+}
+BODY
 
-#curl -H "Content-Type: application/json" -d '{"action" : "get", "entity":"link", "data" : { "id_owner":"'"$USER_ID"'"  }}' $API_URL
 curl -H "Content-Type: application/json" -d '{"action" : "get", "entity":"graph", "data" : { "id_owner":"'"$USER_ID"'"  }}' $API_URL

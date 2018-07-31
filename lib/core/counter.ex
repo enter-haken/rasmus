@@ -37,13 +37,14 @@ defmodule Core.Counter do
      # pending -> new added requests
      {:ok , %{ "id" => id, "state" => "pending", }} -> Core.Manager.perform(id)
 
-     # mostly state changeso
+     # mostly state changes
      # the interesting ones are 'succeeded' and 'succeeded_with_warning'
      # {:ok , %{ "id" => id, "state" => state, "entity" => entity, "action" => action }} -> 
      #  Logger.info("got a request change with state '#{state}' for action '#{action}' and entity '#{entity}' #{id}. ToDo: send message to processes using this entity.")
  
      {:ok , %{ "id" => id, "state" => state, "entity" => "graph", "action" => "get" }} -> 
        Logger.info("got a 'get' request for a graph")
+
        Core.Entity.Graph.get(id);
  
      # an entity is set to dirty -> the client may want to pull the new version of the entity
