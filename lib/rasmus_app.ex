@@ -16,12 +16,22 @@ defmodule RasmusApp do
       { Core.Counter, credentials },
       { Core.Inbound, credentials },
       { Core.Manager, credentials },
-      { Plug.Adapters.Cowboy2, scheme: :http, plug: Web.Router, options: [port: 8080] }
+      { Core.Entity.Graph, credentials },
+      { Plug.Adapters.Cowboy2, scheme: :http, plug: Web.Router, options: [port: 8080, dispatch: dispatch_config()] }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Rasmus.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp dispatch_config do 
+    [
+      {:_, [
+        {"/websocket/", Web.Socket, []},
+        {:_, Plug.Adapters.Cowboy2.Handler, {Web.Router, []}}
+      ]}
+    ]
   end
 end

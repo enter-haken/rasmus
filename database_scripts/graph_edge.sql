@@ -109,17 +109,17 @@ END
         plpy.execute(sql)
 
       sql = """
-CREATE FUNCTION {row}_{column}_manager(request JSONB) RETURNS JSONB AS {dollar}{dollar} 
+CREATE FUNCTION edge_{row}_{column}_manager(request JSONB) RETURNS JSONB AS {dollar}{dollar} 
 DECLARE 
     {row}_{column}_response JSONB;
     manager_result JSONB;
 BEGIN
     CASE request->>'action'
-        WHEN 'get' THEN SELECT rasmus.{row}_{column}_get_manager(request) INTO manager_result;
-        -- WHEN 'add' THEN SELECT rasmus.{row}_{column}_add_manager(request) INTO manager_result;
-        -- WHEN 'delete' THEN SELECT rasmus.{row}_{column}_delete_manager(request) INTO manager_result;
-        -- WHEN 'update' THEN SELECT rasmus.{row}_{column}_update_manager(request) INTO manager_result; 
-        ELSE RAISE EXCEPTION 'unknown action `%`. aborting {row}_{column} manger', request->>'action';
+        WHEN 'get' THEN SELECT rasmus.edge_{row}_{column}_get_manager(request) INTO manager_result;
+        -- WHEN 'add' THEN SELECT rasmus.edge_{row}_{column}_add_manager(request) INTO manager_result;
+        -- WHEN 'delete' THEN SELECT rasmus.edge_{row}_{column}_delete_manager(request) INTO manager_result;
+        -- WHEN 'update' THEN SELECT rasmus.edge_{row}_{column}_update_manager(request) INTO manager_result; 
+        ELSE RAISE EXCEPTION 'unknown action `%`. aborting edge_{row}_{column} manger', request->>'action';
     END CASE;
 
     {row}_{column}_response :=  rasmus.get_entity(request->>'entity')
@@ -129,7 +129,7 @@ BEGIN
 END
 {dollar}{dollar} LANGUAGE plpgsql;
 
-CREATE FUNCTION {row}_{column}_get_manager(request JSONB) RETURNS JSONB AS {dollar}{dollar}
+CREATE FUNCTION edge_{row}_{column}_get_manager(request JSONB) RETURNS JSONB AS {dollar}{dollar}
 DECLARE
     response JSONB;
     sql TEXT;
@@ -164,9 +164,6 @@ END
 
       """.format(row=row,column=column,dollar="$")
       plpy.execute(sql)
-
-
-      
 
 $$ LANGUAGE plpython3u;
 
@@ -215,9 +212,15 @@ CREATE FUNCTION get_graph_for(raw_request JSONB) RETURNS JSONB AS $$
 
   links = json.loads(plpy.execute(plpy.prepare(
       "SELECT rasmus.link_get_manager($1)",["jsonb"]), [link_request])[0]["link_get_manager"])
+
+  # -- todo: select all links where first link or second link in list of links from links dictionary ids
+  edges = json.loads(plpy.execute(plpy.prepare(
+      "SELECT rasmus.edge_link_link_get_manager($1)",["jsonb"]), [link_request])[0]["edge_link_link_get_manager"])
   
   response = {
-    "nodes" : links 
+    "owner" : request["data"]["id_owner"],
+    "nodes" : links,
+    "edges": edges
   } 
 
   return json.dumps(response) 

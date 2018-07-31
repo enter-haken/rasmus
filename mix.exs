@@ -22,6 +22,8 @@ defmodule Rasmus.Mixfile do
     [
       # todo: move to version 1.6 when ready
       {:postgrex, git: "https://github.com/elixir-ecto/postgrex.git", branch: "master"},
+      # used to cast UUID strings to binary representation for postgrex queries
+      {:elixir_uuid, "~> 1.2"},
       {:jason, "~> 1.0"},
       {:ex_doc, "~> 0.11", only: :dev, runtime: false},
       {:cowboy, "~> 2.4"},

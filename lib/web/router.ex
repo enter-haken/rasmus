@@ -90,6 +90,7 @@ defmodule Web.Router do
   defp get_data_from(%{"action" => action} = _body_params) when action == "get", do: {:ok, "fine" }
   defp get_data_from(_body_params), do: {:error, "data field is missing" }
 
+  # get_quoted(["a","b"]) -> 'a', 'b'
   defp get_quoted(strings) do
     strings
     |> Enum.map(fn(x) -> "\'#{x}\'" end)

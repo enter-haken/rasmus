@@ -33,11 +33,20 @@ defmodule Core.Counter do
   """
   def handle_info({:notification, pid, ref, "rasmus", payload},_) do
     case Jason.decode(payload) do
+      
+     # pending -> new added requests
      {:ok , %{ "id" => id, "state" => "pending", }} -> Core.Manager.perform(id)
-       
-     {:ok , %{ "id" => id, "state" => state, "entity" => entity, "action" => action }} -> 
-       Logger.info("got a request change with state '#{state}' for action '#{action}' and entity '#{entity}' #{id}. ToDo: send message to processes using this entity.")
 
+     # mostly state changeso
+     # the interesting ones are 'succeeded' and 'succeeded_with_warning'
+     # {:ok , %{ "id" => id, "state" => state, "entity" => entity, "action" => action }} -> 
+     #  Logger.info("got a request change with state '#{state}' for action '#{action}' and entity '#{entity}' #{id}. ToDo: send message to processes using this entity.")
+ 
+     {:ok , %{ "id" => id, "state" => state, "entity" => "graph", "action" => "get" }} -> 
+       Logger.info("got a 'get' request for a graph")
+       Core.Entity.Graph.get(id);
+ 
+     # an entity is set to dirty -> the client may want to pull the new version of the entity
      {:ok , %{ "id" => id, "action" => "set_dirty", "entity" => entity }} -> 
        Logger.info("got 'set_dirty' for '#{entity}' #{id}. ToDo: send message to processes using this entity.")
 

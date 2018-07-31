@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+
 import { has, isEmpty, head }  from 'lodash';
 
 import vis from "vis";
-
 const styles = {
 }
 // info [label = "*About*\nThis graph shows the relation between\nthe different parts of _rasmus_.\nMost of the nodes are linked\n to the sources of _rasmus.", url = "https://github.com/enter-haken/rasmus"]
@@ -40,11 +40,23 @@ database -- crud
 }
 `
 class Graph extends React.Component {
+
   constructor(props) {
     super(props);
     this.graph = React.createRef();
   }
+
+
   componentDidMount() {
+
+      var client = new WebSocket(`ws://${window.location.host}/websocket/`);
+      client.onopen = (e) => client.send('test');
+      
+      client.onmessage = (e) => console.log('Received: ',e);
+      client.onclose = (e) => console.log('Closed!',e);
+      client.onerror = (e) => console.log('Error:',e);
+
+
     let parsedData = vis.network.convertDot(dot);
     let data = {
       nodes: parsedData.nodes,
@@ -79,7 +91,7 @@ class Graph extends React.Component {
         avoidOverlap : 0.5 
       }
     };
-    
+
     this.network = new vis.Network(this.graph.current, data, options);
     this.network.on("click", (params) => {
       if (isEmpty(params.nodes)) {
@@ -92,6 +104,10 @@ class Graph extends React.Component {
         win.focus();
       }
     });
+  }
+
+  handleData(data) {
+    console.log(data); 
   }
 
   render() {
