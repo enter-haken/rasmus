@@ -1,16 +1,12 @@
 # landing page
 
 The rasmus landing page is used for showing some examples.
-
-You can take a look at
-
-[http://enter-haken.github.io/rasmus](http://enter-haken.github.io/rasmus)
-
-The page will be updated permanently.
+Currently this site is not used.
 
 ## build requirements
 
-    $ npm install -g gulp
+* yarn >= 1.6.0
+* gulp >= 3.9.1
 
 ## build
 

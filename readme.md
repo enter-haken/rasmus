@@ -37,11 +37,6 @@ For the `frontend`
 * nodejs >= 8.11
 * yarn >= 1.6.0
 
-For the `landing page`  
-
-* yarn >= 1.6.0
-* gulp >= 3.9.1
-
 ### compile
 
 A simple 
@@ -51,7 +46,7 @@ A simple
 will create the schema `core` for `rasmus`.
 At the moment, the database will be reset on every `make` call.
 
-It will also compile the `elixir` backend, the documentation, the frontend and the landing page.
+It will also compile the `elixir` backend, the documentation and the frontend.
 
 When you need an update for the `frontend` you need to build and deploy the project.
 
