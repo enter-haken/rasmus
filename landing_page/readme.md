@@ -29,7 +29,7 @@ The folder `./dist` will be removed.
 
     $ make deep_clean
 
-The folder``./node_modules` and `dist` will be deleted.
+The folder `./node_modules` and `./dist` will be deleted.
 
 ## deploy
 

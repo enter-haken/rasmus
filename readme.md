@@ -53,12 +53,9 @@ At the moment, the database will be reset on every `make` call.
 
 It will also compile the `elixir` backend, the documentation, the frontend and the landing page.
 
-When you need an update for either the `frontend` or the `landing_page` you need to
+When you need an update for the `frontend` you need to build and deploy the project.
 
-    $ make deploy
-
-the projects.
-
+    $ make -C frontend/ all 
 
 ### run
 
